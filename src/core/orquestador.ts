@@ -15,12 +15,14 @@ import type {
 } from './types.js';
 import { GestorPuntoControl } from './punto-control.js';
 import { GeneradorCertificado } from './certificado.js';
+import { EvaluadorSanitizer } from './evaluador-sanitizer.js';
 import { LinterCssInline } from './linter-inline-css.js';
 import { SelectorAdaptador } from '../adapters/selector.js';
 import { EjecutorComando } from '../utils/ejecutor.js';
 
 export interface OpcionesAuditoria {
   readonly failFast?: boolean;
+  readonly compuertasAFiltrar?: readonly string[];
   readonly onProgreso?: (compuerta: RegistroCompuerta) => void;
 }
 
@@ -100,6 +102,11 @@ export class OrquestadorPUF15 {
   ): Promise<ResultadoAuditoria> {
     const adaptador = await SelectorAdaptador.resolver(this.directorioRaiz, undefined, archivosAfectados);
     const failFast = Boolean(opciones.failFast);
+
+    // ── G0: Diagnóstico de Entropía y Mojibake (aumic-sanitizer Audit) ─────────
+    const evaluarG0 = async (): Promise<RegistroCompuerta> => {
+      return EvaluadorSanitizer.auditar(this.directorioRaiz);
+    };
 
     // ── G1: Mapeo de Comportamientos y Limites ────────────────────────────────
     const evaluarG1 = async (): Promise<RegistroCompuerta> => {
@@ -376,11 +383,56 @@ export class OrquestadorPUF15 {
       };
     };
 
-    // ── Ejecucion Concurrente de las 15 Compuertas ───────────────────────────
-    // Fase 1 rapida (sin linter): G1-G5, G7-G15
+    // ── Mapa de evaluadores (G0 a G15) ───────────────────────────────────────
+    const mapaEvaluadores: Record<string, () => Promise<RegistroCompuerta>> = {
+      G0: evaluarG0,
+      G1: evaluarG1,
+      G2: evaluarG2,
+      G3: evaluarG3,
+      G4: evaluarG4,
+      G5: evaluarG5,
+      G6: evaluarG6,
+      G7: evaluarG7,
+      G8: evaluarG8,
+      G9: evaluarG9,
+      G10: evaluarG10,
+      G11: evaluarG11,
+      G12: evaluarG12,
+      G13: evaluarG13,
+      G14: evaluarG14,
+      G15: evaluarG15,
+    };
+
+    // Si se especifica filtro de compuertas particulares
+    if (opciones.compuertasAFiltrar && opciones.compuertasAFiltrar.length > 0) {
+      const compuertasObjetivo = opciones.compuertasAFiltrar.map((id) => id.toUpperCase().trim());
+      const compuertasValidas = compuertasObjetivo.filter((id) => mapaEvaluadores[id]);
+      if (compuertasValidas.length === 0) {
+        throw new Error("Ninguna de las compuertas solicitadas es valida. Compuertas soportadas: G0 a G15.");
+      }
+      const tareasFiltradas = compuertasValidas.map((id) => mapaEvaluadores[id]!());
+
+      const resultadosFiltrados = await Promise.all(tareasFiltradas);
+      if (opciones.onProgreso) resultadosFiltrados.forEach((r) => opciones.onProgreso!(r));
+
+      const compuertasOrdenadas = resultadosFiltrados.sort((a, b) =>
+        parseInt(a.id.replace('G', ''), 10) - parseInt(b.id.replace('G', ''), 10)
+      );
+
+      const todasAprobadas = compuertasOrdenadas.every((c) => c.estado === 'aprobada' || c.estado === 'omitida');
+      const reporteMarkdown = GeneradorCertificado.generar({
+        idIncidente, fechaRegistro: new Date().toISOString(),
+        lenguajeDetectado: adaptador.ecosistema, todasAprobadas, compuertas: compuertasOrdenadas, reporteMarkdown: '',
+      });
+
+      return { idIncidente, fechaRegistro: new Date().toISOString(), lenguajeDetectado: adaptador.ecosistema, todasAprobadas, compuertas: compuertasOrdenadas, reporteMarkdown };
+    }
+
+    // ── Ejecucion Concurrente de la Matriz Completa (G0 a G15) ─────────────────
+    // Fase 1 rapida (sin linter pesado G6): G0-G5, G7-G15
     if (failFast) {
       const tareasRapidas = await Promise.all([
-        evaluarG1(), evaluarG2(), evaluarG3(), evaluarG4(), evaluarG5(),
+        evaluarG0(), evaluarG1(), evaluarG2(), evaluarG3(), evaluarG4(), evaluarG5(),
         evaluarG7(), evaluarG8(), evaluarG9(), evaluarG10(), evaluarG11(),
         evaluarG12(), evaluarG13(), evaluarG14(), evaluarG15(),
       ]);
@@ -392,18 +444,18 @@ export class OrquestadorPUF15 {
           parseInt(a.id.replace('G', ''), 10) - parseInt(b.id.replace('G', ''), 10)
         );
         const todasAprobadas = false;
-        const reporte = GeneradorCertificado.generar({
+        const reporteMarkdown = GeneradorCertificado.generar({
           idIncidente, fechaRegistro: new Date().toISOString(),
           lenguajeDetectado: adaptador.ecosistema, todasAprobadas, compuertas: compuertasOrdenadas, reporteMarkdown: '',
         });
-        return { idIncidente, fechaRegistro: new Date().toISOString(), lenguajeDetectado: adaptador.ecosistema, todasAprobadas, compuertas: compuertasOrdenadas, reporteMarkdown: reporte };
+        return { idIncidente, fechaRegistro: new Date().toISOString(), lenguajeDetectado: adaptador.ecosistema, todasAprobadas, compuertas: compuertasOrdenadas, reporteMarkdown };
       }
     }
 
-    // Ejecucion completa: G6 (linter pesado) concurrente con el resto
+    // Ejecucion completa: G6 (linter pesado) concurrente con G0 y el resto
     const [g6, ...resto] = await Promise.all([
       evaluarG6(),
-      evaluarG1(), evaluarG2(), evaluarG3(), evaluarG4(), evaluarG5(),
+      evaluarG0(), evaluarG1(), evaluarG2(), evaluarG3(), evaluarG4(), evaluarG5(),
       evaluarG7(), evaluarG8(), evaluarG9(), evaluarG10(), evaluarG11(),
       evaluarG12(), evaluarG13(), evaluarG14(), evaluarG15(),
     ]);

@@ -32,5 +32,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ingcrea/aum-ic.git"
+  },
+  "dependencies": {
+    "@ingcrea/aumic-sanitizer": "^5.4.3"
   }
 }

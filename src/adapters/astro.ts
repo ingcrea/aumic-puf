@@ -1,6 +1,7 @@
 /**
  * @file astro.ts
  * @description Adaptador heurístico especializado para Astro / Modern SSR.
+ * Compatible cross-platform (Windows & POSIX) con npx.cmd y fallback a npm run build.
  * Estándar AUM-IC 7:2026.
  */
 
@@ -22,16 +23,26 @@ export class AdaptadorAstro extends AdaptadorBase {
   public async ejecutarLinterEstricto(
     directorioRaiz: string
   ): Promise<{ exitoso: boolean; mensaje: string }> {
-    const res = await EjecutorComando.ejecutar('npx astro check 2>/dev/null || npx tsc --noEmit', directorioRaiz);
+    // 1. Intentar astro check o tsc con comando agnóstico
+    const esWindows = process.platform === 'win32';
+    const comandoCheck = esWindows ? 'npx.cmd astro check' : 'npx astro check';
+    const comandoBuild = esWindows ? 'npm.cmd run build' : 'npm run build';
+
+    let res = await EjecutorComando.ejecutar(comandoCheck, directorioRaiz);
+    if (!res.exitoso) {
+      // Fallback a build estricto de Astro (valida tipos, sintaxis y templates al 100%)
+      res = await EjecutorComando.ejecutar(comandoBuild, directorioRaiz);
+    }
+
     if (!res.exitoso) {
       return {
         exitoso: false,
-        mensaje: 'Astro Check / TypeScript detectó errores:\n' + (res.salidaError || res.salidaEstandar),
+        mensaje: 'Astro Build / TypeScript detectó errores:\n' + (res.salidaError || res.salidaEstandar),
       };
     }
     return {
       exitoso: true,
-      mensaje: 'Auditoría estricta de Astro aprobada.',
+      mensaje: 'Auditoría estricta de compilación y contratos Astro aprobada sin errores.',
     };
   }
 

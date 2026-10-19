@@ -5,6 +5,7 @@
  */
 
 export type IdentificadorCompuerta =
+  | 'G0'
   | 'G1'
   | 'G2'
   | 'G3'

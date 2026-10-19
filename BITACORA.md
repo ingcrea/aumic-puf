@@ -1,0 +1,10 @@
+# BITACORA DE ARQUITECTURA Y DE SEGUIMIENTO (ADR)
+## Proyecto: aumic-puf
+## Ecosistema: Multi-Lenguaje Universal (AUM-IC 7:2026 / PUF)
+
+---
+
+[ 2026-10-18T12:20:00Z ] | CONTEXTO: Evolución de PUF-10 a PUF con integración de Compuerta G11 (Ergonomía de SO, Zero-Focus Stealing y Aislamiento UI) y universalización multi-lenguaje de adaptadores. | DECISIÓN: Implementación de la matriz completa de adaptadores de lenguaje (TypeScript, Next.js/React, Rust, C#, C/C++, Flutter/Dart, Swift, Shell/Bash, Astro, Python, PHP). | CONSECUENCIA: Cobertura determinista total sin falsos positivos ni llamadas a herramientas no presentes en el entorno.
+[ 2026-10-18T21:45:00Z ] | CONTEXTO: Generalización arquitectónica del protocolo a 'aumic-puf', incorporación de compuertas G12 (Dead Link Sweeper), G13 (Grafo de Interactividad Zombie), G14 (Contratos HTTP) y G15 (Headless E2E), desacoplamiento numérico y preparación de licenciamiento libre AGPL-3.0 como ofrecimiento de herramientas para el estándar AUM-IC 7:2026. | DECISIÓN: Renombrar paquete a aumic-puf, adoptar AGPL-3.0 oficial con LICENSE íntegro, actualizar binarios CLI ('puf' / 'aumic-puf'), enriquecer metadatos vinculados a https://github.com/ingcrea/aum-ic y generar documentación oficial con README estructurado. | CONSECUENCIA: El paquete opera como suite universal y extensible lista para publicación libre, compatible hacia adelante con cualquier evolución del estándar sin rupturas de nomenclatura.
+
+[ 2026-10-19T00:23:00Z ] | CONTEXTO: Integracion de metricas criticas de Google PageSpeed Insights / Lighthouse en PUF bajo compuerta G16 (Rendimiento, Core Web Vitals, Accesibilidad, SEO y Buenas Practicas). | DECISION: Redaccion formal de PUF_G16_Lighthouse.md con ponderaciones calibradas al modelo PSI y diseno de flujo dual on-demand / CI. | CONSECUENCIA: Estandar enriquecido con auditorias de experiencia y rendimiento web deterministas.

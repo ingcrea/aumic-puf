@@ -1,0 +1,8 @@
+node_modules/
+dist/
+checkpoints/
+*.tsbuildinfo
+*.log
+aumic-history.json
+.DS_Store
+Thumbs.db

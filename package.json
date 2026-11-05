@@ -12,7 +12,8 @@
     "dist",
     "LICENSE*",
     "README*",
-    "PUF*.md"
+    "PUF*.md",
+    "MANIFEST*"
   ],
   "publishConfig": {
     "access": "public"

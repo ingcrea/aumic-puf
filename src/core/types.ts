@@ -20,7 +20,42 @@ export type IdentificadorCompuerta =
   | 'G12'
   | 'G13'
   | 'G14'
-  | 'G15';
+  | 'G15'
+  | 'G16'
+  | 'G17'
+  | 'G18'
+  | 'G19'
+  | 'G20'
+  | 'G21'
+  | 'G22';
+
+export const COMPUERTAS_REGISTRADAS = [
+  'G0',
+  'G1',
+  'G2',
+  'G3',
+  'G4',
+  'G5',
+  'G6',
+  'G7',
+  'G8',
+  'G9',
+  'G10',
+  'G11',
+  'G12',
+  'G13',
+  'G14',
+  'G15',
+  'G16',
+  'G17',
+  'G18',
+  'G19',
+  'G20',
+  'G21',
+  'G22',
+] as const;
+
+export const TOTAL_COMPUERTAS_PUF = COMPUERTAS_REGISTRADAS.length;
 
 export type EstadoCompuerta = 'pendiente' | 'aprobada' | 'rechazada' | 'omitida';
 
@@ -31,6 +66,7 @@ export type EcosistemaLenguaje =
   | 'rust'
   | 'typescript'
   | 'nextjs'
+  | 'java'
   | 'csharp'
   | 'cpp'
   | 'flutter'

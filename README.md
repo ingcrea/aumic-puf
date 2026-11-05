@@ -1,13 +1,104 @@
-# AUM-IC PUF — Protocolo Universal contra Fallos
+# AUM-IC PUF — Protocolo Universal contra Fallos (PUF-23)
 
 [![Licencia AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![Estándar AUM-IC 7:2026](https://img.shields.io/badge/est%C3%A1ndar-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
+[![npm version](https://img.shields.io/badge/npm-v3.0.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
 
 > Suite oficial de aseguramiento de calidad y orquestador determinista para facilitar el cumplimiento del estándar [AUM-IC 7:2026](https://github.com/ingcrea/aum-ic) por **Ingeniería Creativa (IngCrea)**.
 
 ---
 
-## Matriz de Compuertas de Calidad (G1 - G15)
+## Matriz de 23 Compuertas de Calidad (G0 - G22)
+
+### 0. G0: Higiene Forense Anti-Entropía y Codificación Pura (aumic-sanitizer Audit)
+- **Alcance:** Diagnóstico in-process de mojibake, entropía de caracteres, saltos CRLF y codificación UTF-8 pura.
+
+### 1. G1: Mapeo de Comportamientos y Límites (Behavior & Boundary Mapping)
+- **Alcance:** Analizar el flujo completo de ejecución, ciclo de vida de la UI y desacoplamiento de hilos pesados.
+
+### 2. G2: Test de Reproducción — Fase Roja (Reproduction Test-First)
+- **Alcance:** Escribir y verificar test automatizado previo a tocar código de lógica (*Red State*).
+
+### 3. G3: Checkpoint Inmutable (State Snapshot)
+- **Alcance:** Respaldos atómicos con hash SHA-256 en `checkpoints/` para permitir reversión instantánea.
+
+### 4. G4: Reparación Focalizada y Cero CSS Inline (Pure Logic Refactor)
+- **Alcance:** Erradicación de causa raíz, cero código muerto y prohibición de atributos `style="..."` inline.
+
+### 5. G5: Validación de Test y No-Regresión — Fase Verde (Green State & Non-Regression)
+- **Alcance:** 100% de aserciones aprobadas y verificación perimetral contra regresiones colaterales.
+
+### 6. G6: Análisis Estático Estricto (Static Gate Multi-Ecosystem)
+- **Alcance:** Compiladores y linters en modo estricto (Rust, TypeScript, Python, PHP, Java, C#, C++, Swift, etc.).
+
+### 7. G7: Documentación Semántica y Registro ADR (Intent & Architecture Decision)
+- **Alcance:** Registro obligatorio de decisiones de arquitectura en `BITACORA.md`.
+
+### 8. G8: Aplanadora POSIX y Sanitización Anti-Mojibake
+- **Alcance:** Blindaje de bytes LF puros y UTF-8 estricto sin BOM.
+
+### 9. G9: Integridad Operativa, Permisos y Secretos Zero-Trust
+- **Alcance:** Permisos POSIX (644/755) y cero credenciales en texto plano.
+
+### 10. G10: Invalidación y Purga de Estado Efímero
+- **Alcance:** Purga de cachés de compilación (.next, .turbo, target, __pycache__, .phpunit.cache).
+
+### 11. G11: Ergonomía del SO, Foco de Ventanas y Aislamiento UI (Zero-Focus Stealing)
+- **Alcance:** Compuerta obligatoria contra robo de foco en Windows (`CREATE_NO_WINDOW`) e I/O desacoplado de loops UI.
+
+### 12. G12: Topología de Rutas Vivas & Dead Link Sweeper
+- **Alcance:** Detección de enlaces y destinos locales rotos en código web.
+
+### 13. G13: Grafo de Interactividad & Erradicación Zombie
+- **Alcance:** Erradicación de botones decorativos o handlers de eventos inertes.
+
+### 14. G14: Traza de Contratos HTTP & Endpoints Vivos
+- **Alcance:** Detección estática de contratos HTTP rotos o paths huérfanos.
+
+### 15. G15: Headless E2E Crawler & Runtime Exceptions
+- **Alcance:** Suites E2E (Playwright / Cypress) para verificación de flujo funcional.
+
+### 16. G16: Calidad Visual, Core Web Vitals y Auditoría Web (Lighthouse / CWV)
+- **Alcance:** Puntuación de experiencia de usuario, layouts DOM estables y Core Web Vitals.
+
+### 17. G17: Blindaje Legal, Integridad de Licencias y Compatibilidad (IP & License Guard)
+- **Alcance:** Consistencia entre manifiestos (`package.json`, `Cargo.toml`) y archivos `LICENSE`, titularidad y copyright.
+
+### 18. G18: Consistencia de Motores de Estilo y Erradicación de Antipatrones (Style Engine Consistency)
+- **Alcance:** Prevención de colisión entre frameworks (ej. Tailwind + Bootstrap) y control de deuda de `!important`.
+
+### 19. G19: Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)
+- **Alcance:** Erradicación de archivos expuestos (`.env`, `dump.sql`) y prevención de concatenación SQL directa.
+
+### 20. G20: Topología de Entornos, Aislamiento de Red y Cero Conexiones Fantasma (Topology Guard)
+- **Alcance:** Erradicación de referencias hardcodeadas a `localhost` / `127.0.0.1` en entornos de producción.
+
+### 21. G21: Cumplimiento Oficial WordPress & WooCommerce (WPCS & WC Guidelines)
+- **Alcance:** Auditoría estricta de sanitización de superglobales, prepared queries en `$wpdb`, compatibilidad obligatoria con High-Performance Order Storage (HPOS) y métodos CRUD canónicos de `WC_Order`.
+
+### 22. G22: Diagnóstico Universal de Sintaxis y Delimitadores (Universal Syntax Guard)
+- **Alcance:** Localización exacta de omisiones de punto y coma (`;`), comas en JSON y llaves/corchetes/paréntesis desbalanceados en memoria sin requerir compiladores externos.
+
+---
+
+## Uso del Orquestador (CLI)
+
+```bash
+# Instalación global desde npm
+npm install -g @ingcrea/aumic-puf
+
+# Auditar todas las compuertas de la matriz (G0 a G22)
+puf auditar
+
+# Auditar compuertas focalizadas (G0, G21, G22)
+puf auditar -g G0,G21,G22
+
+# Modo fail-fast (aborta al primer fallo detectado)
+puf auditar --fast
+
+# Consultar versión instalada
+puf -v
+```
 
 ### 1. G1: Mapeo de Comportamientos y Limites (Behavior & Boundary Mapping)
 - **Alcance:** Analizar el flujo completo de ejecucion y ciclo de vida de la UI.

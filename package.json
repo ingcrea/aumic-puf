@@ -1,12 +1,21 @@
 {
-  "name": "aumic-puf",
-  "version": "2.0.0",
-  "description": "Orquestador Determinista del Protocolo Universal contra Fallos (PUF-15) — Estándar AUM-IC 7:2026",
+  "name": "@ingcrea/aumic-puf",
+  "version": "3.0.0",
+  "description": "Orquestador Determinista del Protocolo Universal contra Fallos (PUF) — Estándar AUM-IC 7:2026",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "puf": "dist/cli/index.js",
     "aumic-puf": "dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE*",
+    "README*",
+    "PUF*.md"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
@@ -16,11 +25,15 @@
   },
   "keywords": [
     "aum-ic",
-    "puf-15",
+    "puf",
+    "puf-23",
     "calidad",
     "auditoria",
     "antigravity",
-    "ingenieria-creativa"
+    "ingenieria-creativa",
+    "wordpress",
+    "woocommerce",
+    "syntax-guard"
   ],
   "author": "Ingeniería Creativa <contacto@ingcrea.com>",
   "license": "AGPL-3.0",

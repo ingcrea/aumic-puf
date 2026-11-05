@@ -5,6 +5,7 @@
  */
 
 import type { RegistroCompuerta, ResultadoAuditoria } from '../core/types.js';
+import { TOTAL_COMPUERTAS_PUF } from '../core/types.js';
 
 export class InterfazConsola {
   private static readonly RESET  = '\x1b[0m';
@@ -17,21 +18,23 @@ export class InterfazConsola {
   private static readonly MAGENTA = '\x1b[35m';
 
   public static mostrarBanner(): void {
+    const total = TOTAL_COMPUERTAS_PUF;
     console.log(
       '\n' +
       this.CIAN + this.BOLD + '========================================================================\n' +
-      '   PROTOCOLO UNIVERSAL CONTRA FALLOS (PUF-15) — AUM-IC 7:2026\n' +
-      '   Matriz Multi-Lenguaje Universal | 15 Compuertas de Calidad\n' +
+      `   PROTOCOLO UNIVERSAL CONTRA FALLOS (PUF-${total}) — AUM-IC 7:2026\n` +
+      `   Matriz Multi-Lenguaje Universal | ${total} Compuertas de Calidad\n` +
       '========================================================================' + this.RESET + '\n'
     );
   }
 
-  public static renderizarInicioAuditoria(idIncidente: string, failFast: boolean): void {
-    console.log(this.CIAN + '⚡ Evaluando Matriz Concurrente PUF-15 (G1 a G15)' + this.RESET);
+  public static renderizarInicioAuditoria(idIncidente: string, failFast: boolean, totalAFiltrar?: number): void {
+    const total = totalAFiltrar ?? TOTAL_COMPUERTAS_PUF;
+    console.log(this.CIAN + `⚡ Evaluando Matriz Concurrente PUF-${TOTAL_COMPUERTAS_PUF} (G0 a G${TOTAL_COMPUERTAS_PUF - 1})` + this.RESET);
     console.log(this.GRIS + '   Incidente:' + this.RESET + ' ' + this.BOLD + idIncidente + this.RESET);
     const modoTexto = failFast
       ? this.AMARILLO + 'Fail-Fast (Aborta al primer fallo)' + this.RESET
-      : this.VERDE + 'Auditoria Exhaustiva Concurrente (15 Gates)' + this.RESET;
+      : this.VERDE + `Auditoria Exhaustiva Concurrente (${total} Gates)` + this.RESET;
     console.log(this.GRIS + '   Modo:' + this.RESET + ' ' + modoTexto);
     console.log(this.GRIS + '------------------------------------------------------------------------' + this.RESET);
   }
@@ -60,9 +63,10 @@ export class InterfazConsola {
 
   public static renderizarResultado(resultado: ResultadoAuditoria): void {
     console.log(this.GRIS + '------------------------------------------------------------------------' + this.RESET);
+    const total = TOTAL_COMPUERTAS_PUF;
     if (resultado.todasAprobadas) {
       console.log(
-        '\n' + this.VERDE + this.BOLD + '✔ CERTIFICACION PUF-15 APROBADA (100% CUMPLIMIENTO)' + this.RESET + '\n' +
+        '\n' + this.VERDE + this.BOLD + `✔ CERTIFICACION PUF-${total} APROBADA (100% CUMPLIMIENTO)` + this.RESET + '\n' +
         this.VERDE + '  Ecosistema: ' + resultado.lenguajeDetectado.toUpperCase() + ' | Codigo blindado y apto para produccion.' + this.RESET + '\n'
       );
     } else {

@@ -1,59 +1,49 @@
-/**
- * @file evaluador-sanitizer.ts
- * @description Evaluador de Diagnostico de Entropia y Mojibake (G0) usando @ingcrea/aumic-sanitizer.
- * Modo estricto de solo lectura (Dry-Run / Audit) bajo el Estandar AUM-IC 7:2026.
- */
-
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { EjecutorComando } from '../utils/ejecutor.js';
+import * as path from 'node:path';
+import { LectorArbolProyecto } from './arbol-proyecto.js';
 import type { RegistroCompuerta } from './types.js';
 
-export interface ReporteSanitizerAudit {
-  metadata?: {
-    timestamp: string;
-    operacion: string;
-    destino: string;
-    archivosEscaneados: number;
-    archivosAfectados: number;
-    entropiaDestruida: number;
-    tiempoEjecucionSegundos: number;
-  };
-  history?: Array<{
-    filepath: string;
-    corruptions: number;
-    originalContent?: string;
-  }>;
-}
+// @ts-ignore
+import { processFile } from '@ingcrea/aumic-sanitizer/dist/3-cells/Sanitizer.js';
+// @ts-ignore
+import { loadConfig, DEFAULT_CONFIG } from '@ingcrea/aumic-sanitizer/dist/2-molecules/config.js';
 
 export class EvaluadorSanitizer {
   public static async auditar(directorioRaiz: string): Promise<RegistroCompuerta> {
     const inicio = Date.now();
-    const rutaHistorial = path.join(directorioRaiz, 'aumic-history.json');
 
     try {
-      await EjecutorComando.ejecutar('npx aumic-sanitizer audit .', directorioRaiz, 60000);
+      const config = loadConfig(directorioRaiz) || DEFAULT_CONFIG;
+      const archivos = await LectorArbolProyecto.obtenerSnapshot(directorioRaiz);
 
-      let reporte: ReporteSanitizerAudit = {};
-      const existeHistorial = await fs.stat(rutaHistorial).catch(() => null);
+      let totalEscaneados = 0;
+      let entropiaDetectada = 0;
+      const infectados: Array<{ filepath: string; corruptions: number }> = [];
 
-      if (existeHistorial) {
-        const contenidoJson = await fs.readFile(rutaHistorial, 'utf-8');
-        try {
-          reporte = JSON.parse(contenidoJson);
-        } catch {
-          reporte = {};
+      const tamanoLote = 30;
+      for (let i = 0; i < archivos.length; i += tamanoLote) {
+        const lote = archivos.slice(i, i + tamanoLote);
+        const resLote = await Promise.all(
+          lote.map(async (arch) => {
+            try {
+              return await processFile(arch.rutaAbsoluta, { config, audit: true, gitStage: false });
+            } catch {
+              return { filepath: arch.rutaAbsoluta, corruptions: 0, modified: false };
+            }
+          })
+        );
+
+        for (const res of resLote) {
+          totalEscaneados++;
+          if (res && res.corruptions > 0) {
+            entropiaDetectada += res.corruptions;
+            infectados.push({ filepath: res.filepath, corruptions: res.corruptions });
+          }
         }
       }
 
-      const archivosAfectados = reporte.metadata?.archivosAfectados ?? 0;
-      const entropiaDetectada = reporte.metadata?.entropiaDestruida ?? 0;
-      const totalEscaneados = reporte.metadata?.archivosEscaneados ?? 0;
-      const infectados = reporte.history || [];
-
       const tiempoTotal = Date.now() - inicio;
 
-      if (archivosAfectados === 0) {
+      if (infectados.length === 0) {
         return {
           id: 'G0',
           nombre: 'Higiene Forense Anti-Entropia y Codificacion Pura',
@@ -75,8 +65,8 @@ export class EvaluadorSanitizer {
         id: 'G0',
         nombre: 'Higiene Forense Anti-Entropia y Codificacion Pura',
         estado: 'rechazada',
-        detalle: `Se detectaron ${archivosAfectados} archivo(s) infectados con ${entropiaDetectada} anomalias de entropia/mojibake: ${listaArchivos}${sufijo}. Ejecutar "npx aumic-sanitizer scan" para sanar.`,
-        evidencia: `${archivosAfectados} infectados (${entropiaDetectada} anomalias)`,
+        detalle: `Se detectaron ${infectados.length} archivo(s) infectados con ${entropiaDetectada} anomalias de entropia/mojibake: ${listaArchivos}${sufijo}. Ejecutar "aumic-sanitizer scan" para sanar.`,
+        evidencia: `${infectados.length} infectados (${entropiaDetectada} anomalias)`,
         tiempoEjecucionMs: tiempoTotal,
       };
     } catch (error: any) {

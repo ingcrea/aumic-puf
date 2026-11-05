@@ -5,12 +5,14 @@
  */
 
 import type { RegistroCompuerta, ResultadoAuditoria } from './types.js';
+import { TOTAL_COMPUERTAS_PUF } from './types.js';
 
 export class GeneradorCertificado {
   /**
-   * Genera el bloque markdown oficial del Certificado de Calidad PUF-15
+   * Genera el bloque markdown oficial del Certificado de Calidad PUF
    */
   public static generar(resultado: ResultadoAuditoria): string {
+    const total = resultado.compuertas?.length ?? TOTAL_COMPUERTAS_PUF;
     const estadoGlobal = resultado.todasAprobadas
       ? 'APROBADO (100% CUMPLIMIENTO)'
       : 'RECHAZADO (COMPUERTAS FALLIDAS)';
@@ -24,13 +26,13 @@ export class GeneradorCertificado {
       .join('\n');
 
     return [
-      `# Certificado de Calidad PUF-15 — AUM-IC 7:2026`,
+      `# Certificado de Calidad PUF-${TOTAL_COMPUERTAS_PUF} — AUM-IC 7:2026`,
       `**Estado Global:** \`${estadoGlobal}\``,
       `**ID de Incidente:** \`${resultado.idIncidente}\``,
       `**Ecosistema Detectado:** \`${resultado.lenguajeDetectado.toUpperCase()}\``,
       `**Fecha de Registro:** \`${resultado.fechaRegistro}\``,
       '',
-      `## Matriz de 15 Compuertas de Calidad Evaluadas`,
+      `## Matriz de ${total} Compuertas de Calidad Evaluadas`,
       filasCompuertas,
       '',
       `---`,

@@ -19,6 +19,11 @@ async function main(): Promise<void> {
   const directorioActual = process.env['PUF_TARGET_DIR'] || process.cwd();
   const orquestador = new OrquestadorPUF15(directorioActual);
 
+  if (comando === '-v' || comando === '--version' || comando === 'version') {
+    console.log('v3.0.0');
+    return;
+  }
+
   switch (comando) {
     case 'iniciar':
     case 'init': {
@@ -113,7 +118,11 @@ async function main(): Promise<void> {
       const archivos = argumentosLimpios.slice(2).filter((a): a is string => typeof a === 'string');
 
       InterfazConsola.mostrarBanner();
-      InterfazConsola.renderizarInicioAuditoria(idIncidente, failFast);
+      InterfazConsola.renderizarInicioAuditoria(
+        idIncidente,
+        failFast,
+        compuertasAFiltrar.length > 0 ? compuertasAFiltrar.length : undefined
+      );
 
       if (compuertasAFiltrar.length > 0) {
         console.log(`\x1b[36m⚡ Alcance Focalizado:\x1b[0m Evaluando únicamente ${compuertasAFiltrar.join(', ')}\n`);
@@ -199,7 +208,8 @@ async function main(): Promise<void> {
         '  puf auditar [ID-INCIDENTE] [ARCHIVOS...] [-g G0] [--fast]  Evalua la matriz completa o compuerta especifica y genera reporte HTML\n' +
         '  puf revertir <ID-INCIDENTE> <ARCHIVO>                       Restaura atomicamente el archivo previo al fallo\n' +
         '  puf instalar-hook                                           Instala el guardian de Git en .git/hooks/pre-commit\n' +
-        '  puf guard                                                   Valida que los cambios en staged no violen G4 o G7\n'
+        '  puf guard                                                   Valida que los cambios en staged no violen G4 o G7\n' +
+        '  puf -v, --version                                           Muestra la version actual instalada\n'
       );
       break;
     }

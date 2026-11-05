@@ -1,6 +1,6 @@
 {
   "name": "@ingcrea/aumic-puf",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Orquestador Determinista del Protocolo Universal contra Fallos (PUF) — Estándar AUM-IC 7:2026",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,9 @@
     "LICENSE*",
     "README*",
     "PUF*.md",
-    "MANIFEST*"
+    "MANIFEST*",
+    "puf-github-action.yml",
+    "MANIFEST.es.md"
   ],
   "publishConfig": {
     "access": "public"

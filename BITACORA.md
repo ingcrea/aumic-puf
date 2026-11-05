@@ -33,3 +33,5 @@
 - **Decisión:** 1) Implementación de perfiles dinámicos en \src/core/types.ts\ y \src/cli/index.ts\ (\--profile=mvp|dev|security|enterprise\), mapeando subconjuntos de compuertas según el nivel de rigidez; 2) Creación de la plantilla oficial de CI/CD \puf-github-action.yml\; 3) Documentación completa de los perfiles en \README.md\ y \README.es.md\; 4) Recompilación limpia de TypeScript (\
 pm run build\).
 - **Consecuencia:** aumic-puf permite auditorías ultra-rápidas para MVPs y pipelines automatizados de GitHub Actions sin degradar el rigor de calidad.
+
+[2026-11-05T14:28:00Z] | Contexto: Incorporación de perfiles dinámicos de auditoría (--profile=mvp|dev|security|enterprise), workflow oficial de GitHub Actions (puf-github-action.yml) y manifiestos bilingües. | Decisión: Incremento menor de versión SemVer de 3.0.0 a 3.1.0 en package.json y empaquetamiento de nuevos artefactos para distribución oficial en NPM. | Consecuencia: aumic-puf queda preparado para su despliegue a NPM y GitHub Actions sin colisiones de versión.

@@ -1,0 +1,30 @@
+name: AUM-IC PUF Quality Gate
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  puf-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run AUM-IC PUF Audit
+        run: |
+          npx @ingcrea/aumic-puf auditar CI-AUDIT --profile=enterprise --fast
+
+      - name: Upload Forensic Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: puf-report
+          path: puf-report.html

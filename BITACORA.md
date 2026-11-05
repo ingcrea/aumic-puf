@@ -27,3 +27,9 @@
 - **Contexto:** Se detectó la ausencia de versiones en inglés y español para el README y el Manifiesto Arquitectónico bajo la convención internacional del estándar AUM-IC 7:2026.
 - **Decisión:** Se redactaron e integraron README.es.md, README.md, MANIFEST.es.md y MANIFEST.md, enlazados mutuamente mediante barras de navegación bilingües. Se registró MANIFEST* en el array files de package.json.
 - **Consecuencia:** Cumplimiento total del protocolo de documentación AUM-IC; certificación PUF-23 superada al 100% y repositorio preparado para auditorías internacionales.
+
+## [2026-11-05T13:25:00.000000] | Perfiles Dinámicos de Auditoría y Pipeline CI/CD (GitHub Actions)
+- **Contexto:** Se requirió modernizar el flujo de auditoría de aumic-puf para equipos con tiempos reducidos en CI/CD o proyectos en etapa inicial, evitando ejecutar las 23 compuertas de forma indiscriminada.
+- **Decisión:** 1) Implementación de perfiles dinámicos en \src/core/types.ts\ y \src/cli/index.ts\ (\--profile=mvp|dev|security|enterprise\), mapeando subconjuntos de compuertas según el nivel de rigidez; 2) Creación de la plantilla oficial de CI/CD \puf-github-action.yml\; 3) Documentación completa de los perfiles en \README.md\ y \README.es.md\; 4) Recompilación limpia de TypeScript (\
+pm run build\).
+- **Consecuencia:** aumic-puf permite auditorías ultra-rápidas para MVPs y pipelines automatizados de GitHub Actions sin degradar el rigor de calidad.

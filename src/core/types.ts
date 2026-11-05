@@ -132,3 +132,13 @@ export interface AdaptadorLenguaje {
   /** G13: Detecta acciones de UI inertes (botones/handlers sin conectar) */
   auditarInteractividad(archivosAfectados: readonly string[], directorioRaiz: string): Promise<{ exitoso: boolean; violaciones: readonly string[] }>;
 }
+
+
+export type PerfilAuditoria = 'enterprise' | 'mvp' | 'dev' | 'security';
+
+export const COMPUERTAS_POR_PERFIL: Record<PerfilAuditoria, readonly IdentificadorCompuerta[]> = {
+  enterprise: COMPUERTAS_REGISTRADAS,
+  mvp: ['G0', 'G4', 'G6', 'G8', 'G22'],
+  dev: ['G0', 'G4', 'G6', 'G8', 'G22'],
+  security: ['G0', 'G8', 'G9', 'G17', 'G19', 'G20']
+};

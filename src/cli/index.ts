@@ -12,6 +12,7 @@ import { OrquestadorPUF15 } from '../core/orquestador.js';
 import { GuardianGitHook } from '../hooks/guardian-git.js';
 import { GeneradorReporteHtml } from '../core/generador-reporte-html.js';
 import { InterfazConsola } from './interfaz.js';
+import { COMPUERTAS_POR_PERFIL, PerfilAuditoria } from '../core/types.js';
 
 async function main(): Promise<void> {
   const argumentos = process.argv.slice(2);
@@ -59,6 +60,26 @@ async function main(): Promise<void> {
 
       // Extracción de compuertas específicas con -g o --gate
       const compuertasAFiltrar: string[] = [];
+
+      // Extraccion de perfil con --profile=<mvp|dev|security|enterprise>
+      let perfilSeleccionado: PerfilAuditoria = 'enterprise';
+      for (let i = 0; i < argumentos.length; i++) {
+        const arg = argumentos[i];
+        if (!arg) continue;
+        const siguiente = argumentos[i + 1];
+        if (arg === '--profile' && siguiente) {
+          const val = siguiente.toLowerCase() as PerfilAuditoria;
+          if (COMPUERTAS_POR_PERFIL[val]) perfilSeleccionado = val;
+        } else if (arg.startsWith('--profile=')) {
+          const partes = arg.split('=');
+          const val = (partes[1] || '').toLowerCase() as PerfilAuditoria;
+          if (COMPUERTAS_POR_PERFIL[val]) perfilSeleccionado = val;
+        }
+      }
+
+      if (perfilSeleccionado !== 'enterprise') {
+        compuertasAFiltrar.push(...COMPUERTAS_POR_PERFIL[perfilSeleccionado]);
+      }
       const flagsCompuerta = ['-g', '--gate', '--compuerta'];
       
       for (let i = 0; i < argumentos.length; i++) {
@@ -205,7 +226,7 @@ async function main(): Promise<void> {
       console.log(
         'Uso:\n' +
         '  puf iniciar <ID-INCIDENTE> [DESCRIPCION] [ARCHIVOS...]      Genera andamio test (G2) y checkpoints (G3)\n' +
-        '  puf auditar [ID-INCIDENTE] [ARCHIVOS...] [-g G0] [--fast]  Evalua la matriz completa o compuerta especifica y genera reporte HTML\n' +
+        '  puf auditar [ID-INCIDENTE] [ARCHIVOS...] [--profile=mvp]   Evalua la suite (--profile=mvp|dev|security|enterprise)\n' +
         '  puf revertir <ID-INCIDENTE> <ARCHIVO>                       Restaura atomicamente el archivo previo al fallo\n' +
         '  puf instalar-hook                                           Instala el guardian de Git en .git/hooks/pre-commit\n' +
         '  puf guard                                                   Valida que los cambios en staged no violen G4 o G7\n' +

@@ -23,7 +23,7 @@ export class EvaluadorWpWoo {
       a.rutaRelativa.endsWith("functions.php") ||
       a.rutaRelativa.endsWith("wp-config.php") ||
       a.rutaRelativa.includes("wp-content/") ||
-      a.rutaRelativa.includes("_ic-megazone-woo")
+      a.rutaRelativa.includes("woocommerce")
     );
 
     const archivosPhp = archivos.filter(a => a.extension === ".php");
@@ -151,6 +151,28 @@ export class EvaluadorWpWoo {
             linea: lineaNum,
             regla: "WC-CORE-01 (Propiedades Obsoletas)",
             mensaje: "Acceso directo a propiedades privadas de WC_Order obsoletas desde WooCommerce 3.0. Reemplazar por getters canónicos (ej. $order->get_id(), $order->get_status())."
+          });
+        }
+
+        // Regla 5: WordPress Options & Robust Fallback - Uso frágil de ?? con arrays de configuración
+        // En WordPress, get_option() o arrays de settings a menudo devuelven strings vacíos "" cuando un campo se guarda en blanco.
+        // El operador ?? solo evalúa null, ignorando "" y enviando cadenas vacías a integraciones externas.
+        if (/\$(?:settings|options|opt|config)\[[^\]]+\]\s*\?\?\s*['"][^'"]+['"]/i.test(texto)) {
+          violaciones.push({
+            archivo: arch.rutaRelativa,
+            linea: lineaNum,
+            regla: "WP-ROBUST-OPT-01 (Empty Coalesce)",
+            mensaje: "Uso inseguro del operador '??' al extraer opciones o configuración. Si el valor persistido es una cadena vacía (''), el valor por defecto no se aplicará. Utilizar !empty(...) ? ... : fallback."
+          });
+        }
+
+        // Regla 6: Zero Hardcoded Circuit Breakers - Banderas de control de despacho fijadas estáticamente
+        if (/^\s*\$(?:api_ready|dispatch_enabled|is_active|live_mode|production_mode)\s*=\s*(?:false|true)\s*;/i.test(texto)) {
+          violaciones.push({
+            archivo: arch.rutaRelativa,
+            linea: lineaNum,
+            regla: "WP-CIRCUIT-BREAKER-01 (Hardcoded Flag)",
+            mensaje: "Bandera de control de ejecución o despacho fijada estáticamente a boolean literal ($api_ready / $dispatch_enabled). Debe derivar dinámicamente de opciones de WordPress (get_option) o configuración de entorno."
           });
         }
       }

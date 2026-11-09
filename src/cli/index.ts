@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * @file index.ts
- * @description Punto de entrada CLI interactivo y concurrente para `puf` / `aumic-puf`.
- * Soporta selector de compuerta única (-g / --gate), generación de reporte HTML forense
- * e integración diagnóstica con aumic-sanitizer (G0).
+ * @description Punto de entrada CLI interactivo, centinela y servidor MCP para `puf` / `aumic-puf`.
+ * Soporta selector de compuerta única (-g / --gate), perfiles, generación de reporte HTML forense,
+ * modo de vigilancia reactiva (watch), auto-remediación (sanar/fix) y servidor MCP nativo.
  * Estándar AUM-IC 7:2026.
  */
 
@@ -13,6 +13,9 @@ import { GuardianGitHook } from '../hooks/guardian-git.js';
 import { GeneradorReporteHtml } from '../core/generador-reporte-html.js';
 import { InterfazConsola } from './interfaz.js';
 import { COMPUERTAS_POR_PERFIL, PerfilAuditoria } from '../core/types.js';
+import { AutoSanador } from '../core/auto-sanador.js';
+import { CentinelaWatch } from '../core/centinela-watch.js';
+import { ServidorMcpPuf } from '../core/servidor-mcp.js';
 
 async function main(): Promise<void> {
   const argumentos = process.argv.slice(2);
@@ -21,7 +24,13 @@ async function main(): Promise<void> {
   const orquestador = new OrquestadorPUF15(directorioActual);
 
   if (comando === '-v' || comando === '--version' || comando === 'version') {
-    console.log('v3.3.0');
+    console.log('v3.4.0');
+    return;
+  }
+
+  // Subcomando de Servidor MCP Nativo (stdio)
+  if (comando === 'serve' || comando === 'mcp' || argumentos.includes('--mcp')) {
+    ServidorMcpPuf.iniciar(directorioActual);
     return;
   }
 
@@ -29,7 +38,7 @@ async function main(): Promise<void> {
     case 'iniciar':
     case 'init': {
       const idIncidente = argumentos[1];
-      const descripcion = argumentos[2] || 'Resolucion metodica de fallo bajo PUF-15';
+      const descripcion = argumentos[2] || 'Resolucion metodica de fallo bajo PUF-25';
       const archivos = argumentos.slice(3).filter((a): a is string => typeof a === 'string');
 
       if (!idIncidente) {
@@ -38,7 +47,7 @@ async function main(): Promise<void> {
       }
 
       InterfazConsola.mostrarBanner();
-      console.log('[PUF-15]: Inicializando incidente ' + idIncidente + '...');
+      console.log('[PUF-25]: Inicializando incidente ' + idIncidente + '...');
       const res = await orquestador.inicializarIncidente({
         idIncidente,
         descripcionFallo: descripcion,
@@ -51,6 +60,49 @@ async function main(): Promise<void> {
       break;
     }
 
+    case 'sanar':
+    case 'fix': {
+      InterfazConsola.mostrarBanner();
+      const compuertasArgs = argumentos.slice(1).map(c => c.toUpperCase().replace(/^--?G?/, 'G'));
+      console.log(`\x1b[36m⚡ [AUTO-SANADOR DETERMINISTA]:\x1b[0m Iniciando protocolo de reparación quirúrgica...`);
+
+      const sanaciones = await AutoSanador.sanar(
+        directorioActual,
+        compuertasArgs.length > 0 ? compuertasArgs : undefined
+      );
+
+      let totalReparaciones = 0;
+      sanaciones.forEach(s => {
+        totalReparaciones += s.reparacionesAplicadas;
+        const color = s.reparacionesAplicadas > 0 ? '\x1b[32m✔' : '\x1b[90m-';
+        console.log(`${color} [${s.compuerta}]:\x1b[0m ${s.detalle}`);
+        if (s.archivosModificados.length > 0) {
+          s.archivosModificados.forEach(a => console.log(`    \x1b[33m↳ modificado:\x1b[0m ${a}`));
+        }
+      });
+
+      console.log(`\n\x1b[32m✔ Sanación completada:\x1b[0m ${totalReparaciones} anomalías corregidas con respaldos G3 atómicos.\n`);
+      break;
+    }
+
+    case 'watch':
+    case 'centinela': {
+      let perfilWatch: PerfilAuditoria = 'dev';
+      let usarToast = true;
+
+      for (const arg of argumentos.slice(1)) {
+        if (arg.startsWith('--profile=')) {
+          const p = arg.split('=')[1]?.toLowerCase() as PerfilAuditoria;
+          if (COMPUERTAS_POR_PERFIL[p]) perfilWatch = p;
+        } else if (arg === '--no-toast') {
+          usarToast = false;
+        }
+      }
+
+      CentinelaWatch.iniciar(directorioActual, perfilWatch, usarToast);
+      break;
+    }
+
     case 'auditar':
     case 'verificar':
     case 'audit':
@@ -58,10 +110,8 @@ async function main(): Promise<void> {
       const failFast = argumentos.includes('--fast') || argumentos.includes('--fail-fast');
       const sinReporte = argumentos.includes('--no-html');
 
-      // Extracción de compuertas específicas con -g o --gate
       const compuertasAFiltrar: string[] = [];
 
-      // Extraccion de perfil con --profile=<mvp|dev|security|enterprise>
       let perfilSeleccionado: PerfilAuditoria = 'enterprise';
       for (let i = 0; i < argumentos.length; i++) {
         const arg = argumentos[i];
@@ -106,7 +156,6 @@ async function main(): Promise<void> {
         }
       }
 
-      // Parsea ruta de reporte HTML si se especifica con --html o --reporte
       let rutaReportePersonalizada: string | undefined;
       for (let i = 0; i < argumentos.length; i++) {
         const arg = argumentos[i];
@@ -120,7 +169,6 @@ async function main(): Promise<void> {
         }
       }
 
-      // Filtra banderas para obtener idIncidente y archivos
       const argumentosLimpios = argumentos.filter((a, idx) => {
         if (!a) return false;
         const previo = idx > 0 ? argumentos[idx - 1] : undefined;
@@ -159,7 +207,6 @@ async function main(): Promise<void> {
 
       InterfazConsola.renderizarResultado(resultado);
 
-      // Generación automática del reporte HTML forense salvo que se use --no-html
       if (!sinReporte) {
         try {
           const rutaHtml = rutaReportePersonalizada || path.join(directorioActual, 'puf-report.html');
@@ -187,7 +234,7 @@ async function main(): Promise<void> {
       }
 
       InterfazConsola.mostrarBanner();
-      console.log('[PUF-15]: Solicitando reversion atomica G3...');
+      console.log('[PUF-25]: Solicitando reversion atomica G3...');
       const resRollback = await orquestador.revertir(idIncidente, nombreArchivo);
       if (!resRollback.exitoso) {
         console.error('✗ ' + resRollback.mensaje);
@@ -200,7 +247,7 @@ async function main(): Promise<void> {
     case 'hook':
     case 'instalar-hook': {
       InterfazConsola.mostrarBanner();
-      console.log('[PUF-15]: Instalando interceptor forense Git...');
+      console.log('[PUF-25]: Instalando interceptor forense Git...');
       const resHook = await GuardianGitHook.instalar(directorioActual);
       if (!resHook.exitoso) {
         console.error('✗ ' + resHook.mensaje);
@@ -213,7 +260,7 @@ async function main(): Promise<void> {
     case 'guard': {
       const resGuard = await GuardianGitHook.verificarStaged(directorioActual);
       if (!resGuard.exitoso) {
-        console.error('✗ [INTERCEPTOR PUF-15 DENEGO EL COMMIT AGPL-3.0]:');
+        console.error('✗ [INTERCEPTOR PUF-25 DENEGO EL COMMIT AGPL-3.0]:');
         resGuard.errores.forEach((e) => console.error(e));
         process.exit(1);
       }
@@ -225,12 +272,15 @@ async function main(): Promise<void> {
       InterfazConsola.mostrarBanner();
       console.log(
         'Uso:\n' +
-        '  puf iniciar <ID-INCIDENTE> [DESCRIPCION] [ARCHIVOS...]      Genera andamio test (G2) y checkpoints (G3)\n' +
-        '  puf auditar [ID-INCIDENTE] [ARCHIVOS...] [--profile=mvp]   Evalua la suite (--profile=mvp|dev|security|enterprise)\n' +
-        '  puf revertir <ID-INCIDENTE> <ARCHIVO>                       Restaura atomicamente el archivo previo al fallo\n' +
-        '  puf instalar-hook                                           Instala el guardian de Git en .git/hooks/pre-commit\n' +
-        '  puf guard                                                   Valida que los cambios en staged no violen G4 o G7\n' +
-        '  puf -v, --version                                           Muestra la version actual instalada\n'
+        '  puf auditar [ID-INCIDENTE] [--profile=mvp]                 Evalua la suite (--profile=mvp|dev|security|enterprise)\n' +
+        '  puf sanar [COMPUERTAS...]                                 Ejecuta auto-remediacion quirurgica (alias: puf fix)\n' +
+        '  puf watch [--profile=dev] [--no-toast]                    Modo centinela con notificacion dual consola + Toast SO\n' +
+        '  puf serve                                                 Inicia el servidor MCP nativo (Model Context Protocol stdio)\n' +
+        '  puf iniciar <ID-INCIDENTE> [DESCRIPCION] [ARCHIVOS...]    Genera andamio test (G2) y checkpoints (G3)\n' +
+        '  puf revertir <ID-INCIDENTE> <ARCHIVO>                     Restaura atomicamente el archivo previo al fallo\n' +
+        '  puf instalar-hook                                         Instala el guardian de Git en .git/hooks/pre-commit\n' +
+        '  puf guard                                                 Valida que los cambios en staged no violen G4 o G7\n' +
+        '  puf -v, --version                                         Muestra la version actual instalada\n'
       );
       break;
     }
@@ -238,6 +288,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-  console.error('[PUF-15 ERROR FATAL]: ' + error.message);
+  console.error('[PUF ERROR FATAL]: ' + error.message);
   process.exit(1);
 });

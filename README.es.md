@@ -2,7 +2,7 @@
 
 [![Licencia AGPL-3.0](https://img.shields.io/badge/licencia-AGPL--3.0-blue.svg)](LICENSE)
 [![Estándar AUM-IC 7:2026](https://img.shields.io/badge/est%C3%A1ndar-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
-[![npm version](https://img.shields.io/badge/npm-v3.3.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
+[![npm version](https://img.shields.io/badge/npm-v3.4.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
 
 > 🌐 **Navegación:** 🇲🇽 [Leer en Español](./README.es.md) | 🇺🇸 [Read in English](./README.md) | 📜 [Manifiesto (ES)](./MANIFEST.es.md) | 📜 [Manifesto (EN)](./MANIFEST.md) | 🌌 [Estándar AUM-IC 7](https://github.com/ingcrea/aum-ic)
 
@@ -16,8 +16,11 @@ El Protocolo Universal contra Fallos (PUF) no es un linter superficial ni una co
 
 Opera de forma agnóstica a través de adaptadores especializados para **Rust, TypeScript/JavaScript, Astro, Next.js, Python, PHP, Java/JVM, C#, C/C++, Flutter/Dart y Shell**, garantizando cumplimiento riguroso con normativas internacionales de fiabilidad (**ISO/IEC 25010**), seguridad de la información (**ISO 27001**) y testabilidad (**ISO 29119**).
 
-### Características Clave del Motor v3.3.0
+### Características Clave del Motor v3.4.0
 
+* **Auto-Sanador Quirúrgico (`puf sanar` / `puf fix`):** Remediación determinista automatizada de anomalías en G0, G8, G17, G20 y G22, asegurando respaldos inmutables G3 previos con hash SHA-256 antes de cada mutación.
+* **Modo Centinela Dual (`puf watch`):** Vigilancia reactiva en caliente que reporta en consola ANSI y despacha notificaciones Toast nativas en el sistema operativo sin robar foco de ventana (cumplimiento ergonómico G11).
+* **Servidor MCP Nativo (`puf serve` / `puf mcp`):** Protocolo Model Context Protocol por stdio (JSON-RPC) para integración directa con asistentes de IA (Antigravity, Claude, Cursor) sin latencia de subprocesos.
 * **Snapshot VFS en Memoria (`LectorArbolProyecto`):** Mapeo virtual del sistema de archivos con caché volátil estructurado. Permite que las 25 compuertas analicen el repositorio de forma concurrente sin provocar saturación de I/O en disco.
 * **Persistencia Forense Indexada (`RepositorioSqliteAudit`):** Almacenamiento nativo en SQLite (`.aumic/puf_audit.sqlite`) de cada ejecución, registrando métricas de latencia, violaciones detectadas y telemetría histórica con tiempos de consulta inferiores a 20 ms.
 * **Testing Avanzado Integrado:** Incorpora pruebas de resistencia a mutaciones (G23) e inyección de caos con validación de disyuntores de red (G24).

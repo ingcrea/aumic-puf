@@ -210,7 +210,40 @@ puf auditar -g G21,G23,G24
 puf auditar -g G0,G8,G22
 ```
 
-#### 4. Incident Workflow & Rollback
+#### 4. Deterministic Auto-Fix (puf sanar / puf fix)
+```bash
+# Automatically remediates all repairable gates (G0, G8, G17, G20, G22)
+puf sanar
+
+# Remediate specific gates (e.g. only encoding hygiene and syntax delimiters)
+puf sanar G0,G22
+
+# International alias
+puf fix
+```
+
+#### 5. Dual Reactive Watch Sentinel (puf watch)
+```bash
+# Live filesystem listener with dev profile and native OS toast alerts
+puf watch
+
+# Watch with a specific audit profile
+puf watch --profile=security
+
+# Quiet mode (ANSI terminal only, suppressing OS toasts)
+puf watch --no-toast
+```
+
+#### 6. Native MCP Server (Model Context Protocol for AI Agents)
+```bash
+# Starts the stdio MCP server for Antigravity, Claude Desktop, or Cursor
+puf serve
+
+# Equivalent alias
+puf mcp
+```
+
+#### 7. Incident Workflow & Rollback
 ```bash
 # Initialize incident (generates G2 test harness and creates G3 immutable state snapshot)
 puf iniciar INC-105 "Resilience hardening in gateway" src/checkout.ts

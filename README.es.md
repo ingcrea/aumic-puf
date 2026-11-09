@@ -210,7 +210,40 @@ puf auditar -g G21,G23,G24
 puf auditar -g G0,G8,G22
 ```
 
-#### 4. Gestión de Incidentes y Reversión Atómica
+#### 4. Auto-Sanador Quirúrgico (puf sanar / puf fix)
+```bash
+# Ejecuta remediación automática en todas las compuertas sanables (G0, G8, G17, G20, G22)
+puf sanar
+
+# Sanar compuertas específicas (ej. solo higiene forense y delimitadores)
+puf sanar G0,G22
+
+# Alias internacional equivalente
+puf fix
+```
+
+#### 5. Modo Centinela Reactivo (puf watch)
+```bash
+# Vigilancia en caliente con perfil dev y notificaciones Toast nativas del SO
+puf watch
+
+# Vigilancia con perfil específico
+puf watch --profile=security
+
+# Vigilancia en modo silencioso (solo salida de consola, sin Toasts)
+puf watch --no-toast
+```
+
+#### 6. Servidor MCP Nativo (Model Context Protocol para IAs)
+```bash
+# Inicia el servidor MCP nativo por stdio para Antigravity, Claude Desktop o Cursor
+puf serve
+
+# Alias equivalente
+puf mcp
+```
+
+#### 7. Gestión de Incidentes y Reversión Atómica
 ```bash
 # Inicia un incidente (genera andamio de test G2 y captura checkpoint inmutable G3)
 puf iniciar INC-105 "Blindaje de resiliencia en pasarela" src/checkout.ts

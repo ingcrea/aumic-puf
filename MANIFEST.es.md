@@ -94,6 +94,12 @@ Un asteroide obedece las mismas leyes fundamentales que una galaxia; sin embargo
 
 ## GLOSARIO TÁCTICO: EL PORQUÉ DE LAS REGLAS
 
+* **¿Por qué implementar el Auto-Sanador Quirúrgico (`puf sanar` / `puf fix`)?**  
+  La auditoría que solo señala fallos pero no cura introduce fricción cognitiva innecesaria. El auto-sanador corrige anomalías deterministas (BOM, CRLF, placeholders de copyright, delimitadores CSS/PHP) en milisegundos, respaldando siempre el archivo previo con hash SHA-256 (G3) para garantizar reversión instantánea.
+* **¿Por qué integrar un Centinela con Notificaciones Toast nativas (`puf watch`)?**  
+  Durante pruebas de interfaz o navegación web el desarrollador no mira la terminal. El Centinela corre en segundo plano y despacha alertas emergentes silenciosas que no roban el foco del teclado (G11), avisando inmediatamente si un cambio rompió una compuerta.
+* **¿Por qué exponer un Servidor MCP Nativo (`puf serve`)?**  
+  Los agentes de inteligencia artificial (Antigravity, Cursor, Claude) son pares de programación en el estándar AUM-IC. Exponer herramientas JSON-RPC por stdio permite que las IAs auditen y auto-remedien el código con latencia cero en memoria sin crear scripts temporales ni saturar terminales.
 * **¿Por qué auditar la Resistencia a Mutaciones (G23)?**  
   Una suite con 100% de cobertura que no falla cuando un operador se invierte es una ilusión de seguridad. G23 verifica que las aserciones validen lógica de estado real y no existan tests complacientes.
 * **¿Por qué inyectar Caos y Disyuntores de Red (G24)?**  

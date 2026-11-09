@@ -94,6 +94,12 @@ An asteroid obeys the exact same gravitational laws as a galaxy; however, archit
 
 ## TACTICAL GLOSSARY: THE "WHY" BEHIND THE RULES
 
+* **Why implement the Deterministic Surgical Auto-Fix (`puf sanar` / `puf fix`)?**  
+  An audit engine that only flags errors without healing them introduces avoidable cognitive friction. The auto-fixer corrects mechanical deviations (BOM, CRLF linebreaks, license placeholders, CSS/PHP missing delimiters) in milliseconds, backing up original state with SHA-256 hashes (G3) before mutating disk.
+* **Why integrate a Sentinel Watch with native OS Toasts (`puf watch`)?**  
+  During frontend interaction or manual browser testing, engineers don't watch the terminal. The Watch Sentinel runs in the background and delivers non-intrusive toast notifications without stealing desktop focus (G11 compliance), alerting immediately if a mutation broke a gate.
+* **Why expose a Native MCP Server (`puf serve`)?**  
+  AI coding agents (Antigravity, Cursor, Claude) are full team members under the AUM-IC standard. Exposing stdio JSON-RPC tools allows autonomous agents to audit and remediate code in-memory with sub-5ms latency without messy script wrappers or brittle CLI scraping.
 * **Why audit Mutation Testing Resilience (G23)?**  
   High test coverage with empty or tautological assertions is a dangerous illusion. G23 enforces that assertions genuinely evaluate state deviations, ensuring mutants are actively killed.
 * **Why audit Chaos Fault Injection and Circuit Breakers (G24)?**  

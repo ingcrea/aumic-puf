@@ -21,7 +21,7 @@ async function main(): Promise<void> {
   const orquestador = new OrquestadorPUF15(directorioActual);
 
   if (comando === '-v' || comando === '--version' || comando === 'version') {
-    console.log('v3.2.1');
+    console.log('v3.3.0');
     return;
   }
 

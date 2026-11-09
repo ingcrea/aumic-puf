@@ -3,12 +3,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-7.0.0-crimson?style=flat-square" alt="Versión 7.0.0">
   <img src="https://img.shields.io/badge/naturaleza-Estandar%20de%20Ingenieria%20Pura-38bdf8?style=flat-square" alt="Naturaleza">
-  <img src="https://img.shields.io/badge/suite-PUF--23%20Aseguramiento-gold?style=flat-square" alt="PUF-23">
+  <img src="https://img.shields.io/badge/suite-PUF--25%20Aseguramiento-gold?style=flat-square" alt="PUF-25">
 </p>
 
 > 🌐 **Navegación:** 🇲🇽 [Leer en Español](./MANIFEST.es.md) | 🇺🇸 [Read in English](./MANIFEST.md) | 📖 [README (ES)](./README.es.md) | 📖 [README (EN)](./README.md) | 🌌 [Estándar AUM-IC 7](https://github.com/ingcrea/aum-ic)
 
-Este documento rige el **Paradigma de Universos Multidimensionales de Ingeniería Creativa (Estándar AUM-IC 7)** y su correspondencia operativa con la matriz de 23 compuertas del **Protocolo Universal contra Fallos (PUF-23)**.
+Este documento rige el **Paradigma de Universos Multidimensionales de Ingeniería Creativa (Estándar AUM-IC 7)** y su correspondencia operativa con la matriz de 25 compuertas del **Protocolo Universal contra Fallos (PUF-25)**.
 
 No es una convención arbitraria de directorios ni una sugerencia cosmética: es un marco riguroso de arquitectura, física fractal e ingeniería de software concebido para satisfacer de forma nativa los estándares internacionales de calidad de producto (**ISO/IEC 25010**), seguridad de la información (**ISO 27001**), testabilidad (**ISO 29119**) y accesibilidad web (**ISO 40500 / WCAG 2.2**).
 
@@ -49,9 +49,9 @@ Todo sistema en producción debe operar bajo 7 leyes dinámicas que rigen el flu
 1. **Materia Oscura (Estado Global):** La gravedad invisible. La información global de la aplicación (Zustand, Redux, Daemons de memoria) unifica a los organismos sin acoplarlos de forma directa (*Prop Drilling* prohibido).
 2. **Horizonte de Eventos (Seguridad Perimetral):** Frontera impenetrable. Aplica Content Security Policy (CSP), Rate Limiting estricto, challenge anti-bots y validación criptográfica de firmas JWT. Todo payload sin firma válida es repelido en el middleware.
 3. **Campo Magnético (ORM y Sanitización):** Protege el núcleo del sistema contra radiación cósmica (inyecciones SQL y ataques XSS). Queda prohibido el SQL en texto plano sin parametrizar. La materia no se destruye arbitrariamente: se exige el **Borrado Lógico (Soft Deletes)** y el control estricto de esquemas mediante migraciones declarativas.
-4. **El Colisionador de Hadrones (Ciclo Cerrado de Calidad PUF-23):** El caos no entra a producción. Antes de un release, el código debe superar la matriz de 23 compuertas de aseguramiento (**G0 a G22**), auditando desde la codificación de bytes hasta contratos de API y compatibilidad de licencias.
+4. **El Colisionador de Hadrones (Ciclo Cerrado de Calidad PUF-25):** El caos no entra a producción. Antes de un release, el código debe superar la matriz de 25 compuertas de aseguramiento (**G0 a G24**), auditando desde la codificación de bytes hasta contratos de API, pruebas de mutación (G23) y resiliencia ante caos (G24).
 5. **Agujeros de Gusano (Caché y Arquitectura Offline-First):** Supera la latencia de la red. Despliega bases de datos locales incrustadas (SQLite, Realm) en clientes Desktop/Mobile o clústeres Redis en la nube, garantizando que el sistema opere y facture aun en condiciones de desconexión.
-6. **La Malla Cósmica (Resiliencia Distribuida):** Implementación obligatoria de **Circuit Breakers** para aislar servicios externos caídos y bucles exponenciales de reconexión (**Exponential Backoff**) para revivir enlaces a bases de datos de forma autónoma.
+6. **La Malla Cósmica (Resiliencia Distribuida):** Implementación obligatoria de **Circuit Breakers (G24)** para aislar servicios externos caídos y bucles exponenciales de reconexión (**Exponential Backoff**) para revivir enlaces a bases de datos de forma autónoma.
 7. **Radiación Cósmica de Fondo (Observabilidad Forense y RUM):** Toda interacción deja una huella digital determinista. Telemetría de usuario real (RUM), captura de excepciones de runtime globales, monitoreo de 404s y despacho inmediato de alertas al centro de comando.
 
 ---
@@ -78,28 +78,28 @@ Un asteroide obedece las mismas leyes fundamentales que una galaxia; sin embargo
 
 ---
 
-## MATRIZ DE CORRESPONDENCIA: AUM-IC 7 vs. PUF-23
+## MATRIZ DE CORRESPONDENCIA: AUM-IC 7 vs. PUF-25
 
-| Fuerza Cósmica AUM-IC | Compuertas PUF-23 que la Certifican | Objetivo Operativo |
+| Fuerza Cósmica AUM-IC | Compuertas PUF-25 que la Certifican | Objetivo Operativo |
 | :--- | :--- | :--- |
 | **Higiene Fundamental** | **`G0`**, **`G8`**, **`G22`** | Codificación UTF-8 pura, saltos LF, erradicación de mojibake y balanceo universal de delimitadores. |
-| **Colisionador de Hadrones** | **`G2`**, **`G3`**, **`G5`**, **`G6`** | Ciclo rojo/verde de tests, snapshots SHA-256 de reversión y rigor estático absoluto. |
+| **Colisionador de Hadrones** | **`G2`**, **`G3`**, **`G5`**, **`G6`**, **`G23`** | Ciclo rojo/verde de tests, snapshots SHA-256 de reversión, rigor estático y resistencia a mutaciones lógicas. |
 | **Campo Magnético** | **`G4`**, **`G19`**, **`G21`** | Refactor limpio, cero inyecciones SQL, erradicación de secretos y compliance estricto WordPress/WooCommerce. |
 | **Horizonte de Eventos** | **`G9`**, **`G17`**, **`G20`** | Permisos POSIX restrictivos, consistencia de licencias y aislamiento de entornos (cero localhost en producción). |
 | **Gravedad Cero y Estructura** | **`G1`**, **`G11`**, **`G18`** | Desacoplamiento de hilos UI, cero robo de foco (`CREATE_NO_WINDOW`) y coexistencia limpia de motores CSS. |
-| **Malla Cósmica y Rutas** | **`G12`**, **`G13`**, **`G14`** | Cero enlaces 404, erradicación de botones zombies y validación de contratos API cliente/servidor. |
+| **Malla Cósmica y Resiliencia** | **`G12`**, **`G13`**, **`G14`**, **`G24`** | Cero enlaces 404, erradicación de botones zombies, contratos API y tolerancia a caos de red (Circuit Breakers). |
 | **Radiación de Fondo** | **`G7`**, **`G10`**, **`G15`**, **`G16`** | Registro ADR en `BITACORA.md`, purga de cachés corruptas, pruebas E2E y Core Web Vitals. |
 
 ---
 
 ## GLOSARIO TÁCTICO: EL PORQUÉ DE LAS REGLAS
 
-* **¿Por qué prohibir las consultas Raw SQL sin parametrizar?**  
-  Escribir consultas concatenando texto del usuario es apagar el Campo Magnético. Permite que cualquier inyección SQL altere la estructura de la base de datos, destruyendo la integridad relacional de la información.
+* **¿Por qué auditar la Resistencia a Mutaciones (G23)?**  
+  Una suite con 100% de cobertura que no falla cuando un operador se invierte es una ilusión de seguridad. G23 verifica que las aserciones validen lógica de estado real y no existan tests complacientes.
+* **¿Por qué inyectar Caos y Disyuntores de Red (G24)?**  
+  En un sistema distribuido, las caídas no son una excepción sino una certeza matemática. G24 audita que el cliente no se quede bloqueado indefinidamente esperando una respuesta de red, forzando timeouts y disyuntores.
 * **¿Por qué capturar Checkpoints inmutables con SHA-256 (G3)?**  
   Toda modificación de código sin respaldo verificado introduce riesgo de entropía irreversible. Un checkpoint criptográfico asegura que cualquier intento fallido de reparación pueda colapsarse y revertirse al estado exacto previo al fallo.
-* **¿Por qué destruir listeners y desacoplar temporizadores (G1 y G11)?**  
-  Un proceso en segundo plano, worker o websocket que no se destruye explícitamente se convierte en un objeto errante que consume memoria RAM de forma indefinida (Memory Leak), provocando bloqueos en el sistema operativo y degradando la ergonomía del usuario.
 
 ---
 

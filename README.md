@@ -1,12 +1,12 @@
-# AUM-IC PUF — Universal Failure Prevention Protocol (PUF-23)
+# AUM-IC PUF — Universal Failure Prevention Protocol (PUF-25)
 
 [![AGPL-3.0 License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![AUM-IC 7:2026 Standard](https://img.shields.io/badge/standard-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
-[![npm version](https://img.shields.io/badge/npm-v3.2.1-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
+[![npm version](https://img.shields.io/badge/npm-v3.3.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
 
 > 🌐 **Navigation:** 🇺🇸 [Read in English](./README.md) | 🇲🇽 [Leer en Español](./README.es.md) | 📜 [Manifesto (EN)](./MANIFEST.md) | 📜 [Manifiesto (ES)](./MANIFEST.es.md) | 🌌 [AUM-IC 7 Standard](https://github.com/ingcrea/aum-ic)
 
-Official deterministic quality assurance engine and 23-gate universal multi-language orchestrator (G0 to G22) implementing the **AUM-IC 7:2026 Standard**, engineered and maintained by **Ingeniería Creativa (IngCrea)**.
+Official deterministic quality assurance engine and 25-gate universal multi-language orchestrator (G0 to G24) implementing the **AUM-IC 7:2026 Standard**, engineered and maintained by **Ingeniería Creativa (IngCrea)**.
 
 ---
 
@@ -16,16 +16,17 @@ The Universal Failure Prevention Protocol (PUF) is not a surface-level linter or
 
 Operating agnostically via specialized language adapters for **Rust, TypeScript/JavaScript, Astro, Next.js, Python, PHP, Java/JVM, C#, C/C++, Flutter/Dart, and Shell**, it enforces compliance with international reliability (**ISO/IEC 25010**), information security (**ISO 27001**), and testability (**ISO 29119**) benchmarks.
 
-### Key Engine Features in v3.2.1
+### Key Engine Features in v3.3.0
 
-* **In-Memory VFS Snapshot (`LectorArbolProyecto`):** Structured volatile filesystem snapshot caching. Enables multiple gates to evaluate project structure and code concurrently with zero disk I/O bottleneck.
+* **In-Memory VFS Snapshot (`LectorArbolProyecto`):** Structured volatile filesystem snapshot caching. Enables all 25 gates to evaluate project structure and code concurrently with zero disk I/O bottleneck.
 * **Indexed Forensic Persistence (`RepositorioSqliteAudit`):** Native SQLite engine persistence (`.aumic/puf_audit.sqlite`) recording execution latency, identified infractions, and historical audit telemetry with sub-20ms query overhead.
+* **Integrated Advanced Testing:** Incorporates Mutation Resilience Verification (G23) and Chaos Fault Injection with Circuit Breaker inspection (G24).
 * **Dynamic Audit Profiles (`--profile`):** Adaptable gate execution matching pipeline requirements (`enterprise`, `mvp`, `dev`, `security`).
 * **Zero-Black-Box Telemetry:** Comprehensive HTML forensic dashboard (`puf-report.html`) complete with SVG compliance gauges, key impact KPI tiles, and pinpointed line-by-line violation reports.
 
 ---
 
-## Comprehensive Matrix of Quality Gates (G0 to G22)
+## Comprehensive Matrix of Quality Gates (G0 to G24)
 
 ### G0: Forensic Anti-Entropy & Encoding Hygiene (In-Process Sanitizer)
 * **Purpose:** Ensures zero corrupted bytes, phantom BOM markers, or invalid character sequences enter development streams.
@@ -37,7 +38,7 @@ Operating agnostically via specialized language adapters for **Rust, TypeScript/
 
 ### G2: Reproduction Test-First — Red Phase (Reproduction Test-First)
 * **Purpose:** Prevents guesswork and subjective speculation during defect resolution.
-* **What it does:** Mandates the presence or authoring of an automated test (unit, integration, or CLI-driven) faithfully reproducing the reported flaw. Verifies that the test unmistakably fails against the current codebase (*Red State*) before any production code modification is allowed.
+* **What it does:** Mandates the presence or authoring of an automated test (unit, integration, or property-based) faithfully reproducing the reported flaw. Verifies that the test unmistakably fails against the current codebase (*Red State*) before any production code modification is allowed.
 
 ### G3: Immutable State Checkpoint (State Snapshot Guard)
 * **Purpose:** Delivers immunity against destructive regressions or data loss during bug mitigation.
@@ -137,6 +138,16 @@ Operating agnostically via specialized language adapters for **Rust, TypeScript/
   * Audits JSON integrity (detecting unescaped structures, missing commas, or trailing commas).
   * Evaluates perfect bracket balance (`{ }`, `[ ]`, `( )`), smartly ignoring strings, inline comments, and regular expression literals to pinpoint the exact line of any imbalance.
 
+### G23: Mutation Resilience & Assertions Verification (Mutation Resilience Guard)
+* **Purpose:** Eradicates the illusion of safety provided by high coverage test suites lacking assertion power.
+* **What it does:** Audits test effectiveness by detecting vacuous, complacently passed, or tautological assertions (`expect(true).toBe(true)`). Verifies that tests enforce genuine state contracts capable of catching mutant logic deviations if operators are inverted in production code.
+
+### G24: Chaos Fault Injection & Circuit Breakers (Chaos & Fault Injection Guard)
+* **Purpose:** Ensures distributed microservices and database clients survive high network latency and intermittent outages without process deadlock.
+* **What it does:** Audits client HTTP transport and database connections for resilience engineering patterns:
+  * Detects unbound fetch calls lacking abort timeouts or explicit `AbortController` signals.
+  * Validates the integration of **Circuit Breakers** and **Exponential Backoff Reconnect Loops** to isolate degraded downstream dependencies without human intervention.
+
 ---
 
 ## Dynamic Audit Profiles (`--profile`)
@@ -145,10 +156,10 @@ To accelerate continuous integration pipelines and local pre-commit cycles, PUF 
 
 | Profile | Evaluated Gates | Primary Use Case |
 | :--- | :--- | :--- |
-| **`enterprise`** *(Default)* | **G0 through G22 (All 23 Gates)** | Complete gate certification required prior to production release or distribution. |
+| **`enterprise`** *(Default)* | **G0 through G24 (All 25 Gates)** | Complete gate certification required prior to production release or distribution. |
 | **`mvp`** | `G0`, `G4`, `G6`, `G8`, `G22` | Rapid proof-of-concept audit: forensic hygiene, pure logic, strict static checks, and syntax. |
 | **`dev`** | `G0`, `G4`, `G6`, `G8`, `G22` | Lightning-fast local development loop without external dependency overhead. |
-| **`security`** | `G0`, `G8`, `G9`, `G17`, `G19`, `G20` | Specialized audit for infrastructure, file permissions, secret hygiene, topology, and injections. |
+| **`security`** | `G0`, `G8`, `G9`, `G17`, `G19`, `G20`, `G24` | Dedicated security, secret hygiene, topology, and network resilience audit. |
 
 ---
 
@@ -168,7 +179,7 @@ npx @ingcrea/aumic-puf auditar
 
 #### 1. Full Matrix Audit (Enterprise)
 ```bash
-# Concurrently evaluates all 23 quality gates across the current directory
+# Concurrently evaluates all 25 quality gates across the current directory
 puf auditar
 
 # Fail-fast execution (immediately halts upon encountering the first failure)
@@ -180,7 +191,7 @@ puf auditar --fast
 # Fast local development check
 puf auditar --profile=dev
 
-# Dedicated security shield audit
+# Dedicated security shield and resilience audit
 puf auditar --profile=security
 
 # Rapid prototype audit
@@ -189,20 +200,20 @@ puf auditar --profile=mvp
 
 #### 3. Granular Gate Targeting
 ```bash
-# Run only encoding hygiene, WordPress compliance, and syntax checking
-puf auditar -g G0,G21,G22
+# Run only mutation tests, chaos injection, and WordPress compliance
+puf auditar -g G21,G23,G24
 
-# Run security, attack surface, and environment topology gates
-puf auditar -g G9,G19,G20
+# Run encoding hygiene, POSIX squasher, and universal syntax guard
+puf auditar -g G0,G8,G22
 ```
 
 #### 4. Incident Workflow & Rollback
 ```bash
 # Initialize incident (generates G2 test harness and creates G3 immutable state snapshot)
-puf iniciar INC-104 "Payment gateway calculation fix" src/checkout.ts
+puf iniciar INC-105 "Resilience hardening in gateway" src/checkout.ts
 
 # Lossless rollback to SHA-256 pre-mutation state
-puf revertir INC-104 src/checkout.ts
+puf revertir INC-105 src/checkout.ts
 ```
 
 #### 5. Git Pre-Commit Hook Integration
@@ -228,7 +239,7 @@ puf --version
 The repository packages an official workflow template [`puf-github-action.yml`](puf-github-action.yml). To integrate into any GitHub repository:
 
 ```yaml
-name: AUM-IC PUF-23 Certification
+name: AUM-IC PUF-25 Certification
 on: [push, pull_request]
 
 jobs:

@@ -27,7 +27,9 @@ export type IdentificadorCompuerta =
   | 'G19'
   | 'G20'
   | 'G21'
-  | 'G22';
+  | 'G22'
+  | 'G23'
+  | 'G24';
 
 export const COMPUERTAS_REGISTRADAS = [
   'G0',
@@ -53,6 +55,8 @@ export const COMPUERTAS_REGISTRADAS = [
   'G20',
   'G21',
   'G22',
+  'G23',
+  'G24',
 ] as const;
 
 export const TOTAL_COMPUERTAS_PUF = COMPUERTAS_REGISTRADAS.length;
@@ -140,5 +144,5 @@ export const COMPUERTAS_POR_PERFIL: Record<PerfilAuditoria, readonly Identificad
   enterprise: COMPUERTAS_REGISTRADAS,
   mvp: ['G0', 'G4', 'G6', 'G8', 'G22'],
   dev: ['G0', 'G4', 'G6', 'G8', 'G22'],
-  security: ['G0', 'G8', 'G9', 'G17', 'G19', 'G20']
+  security: ['G0', 'G8', 'G9', 'G17', 'G19', 'G20', 'G24']
 };

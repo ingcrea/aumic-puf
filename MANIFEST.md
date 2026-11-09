@@ -3,12 +3,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-7.0.0-crimson?style=flat-square" alt="Version 7.0.0">
   <img src="https://img.shields.io/badge/nature-Pure%20Engineering%20Standard-38bdf8?style=flat-square" alt="Nature">
-  <img src="https://img.shields.io/badge/suite-PUF--23%20Assurance-gold?style=flat-square" alt="PUF-23">
+  <img src="https://img.shields.io/badge/suite-PUF--25%20Assurance-gold?style=flat-square" alt="PUF-25">
 </p>
 
 > 🌐 **Navigation:** 🇺🇸 [Read in English](./MANIFEST.md) | 🇲🇽 [Leer en Español](./MANIFEST.es.md) | 📖 [README (EN)](./README.md) | 📖 [README (ES)](./README.es.md) | 🌌 [AUM-IC 7 Standard](https://github.com/ingcrea/aum-ic)
 
-This document governs the **Multidimensional Universe Architecture Paradigm (AUM-IC 7 Standard)** and its operational correspondence with the 23-gate matrix of the **Universal Failure Prevention Protocol (PUF-23)**.
+This document governs the **Multidimensional Universe Architecture Paradigm (AUM-IC 7 Standard)** and its operational correspondence with the 25-gate matrix of the **Universal Failure Prevention Protocol (PUF-25)**.
 
 It is neither an arbitrary folder recommendation nor a cosmetic convention: it is a deterministic framework of architecture, fractal symmetry, and software physics engineered to inherently satisfy international product quality (**ISO/IEC 25010**), information security (**ISO 27001**), testability (**ISO 29119**), and web accessibility standards (**ISO 40500 / WCAG 2.2**).
 
@@ -49,9 +49,9 @@ Every production system must enforce 7 dynamic laws governing data flow and runt
 1. **Dark Matter (Global State):** The invisible gravitational bond. Global application state (Zustand, Redux, background memory daemons) connects organisms without toxic coupling (*Prop Drilling is strictly forbidden*).
 2. **Event Horizon (Perimeter Security):** The impenetrable boundary. Enforces strict Content Security Policy (CSP), rate limiting, bot challenges, and cryptographic JWT verification. Any payload lacking a valid spectral signature is rejected at the middleware gateway.
 3. **Magnetic Field (ORM & Sanitization):** Shields the system core against cosmic radiation (SQL Injections and XSS attacks). Raw unparameterized SQL strings are banned. Matter cannot be arbitrarily destroyed: **Soft Deletes** and declarative schema migrations are mandatory.
-4. **The Hadron Collider (PUF-23 Closed-Loop Assurance):** Chaos does not enter production. Prior to any release, code must clear the 23-gate matrix (**G0 to G22**), auditing everything from raw byte hygiene to API contracts and licensing compliance.
+4. **The Hadron Collider (PUF-25 Closed-Loop Assurance):** Chaos does not enter production. Prior to any release, code must clear the 25-gate matrix (**G0 to G24**), auditing everything from raw byte hygiene to API contracts, mutation testing resilience (G23), and chaos fault injection (G24).
 5. **Wormholes (Cache & Offline-First Architecture):** Defeats network latency. Employs embedded local databases (SQLite, Realm) in desktop/mobile apps or distributed Redis clusters in cloud backends, guaranteeing uninterrupted operation and transactional capability during network dropouts.
-6. **The Cosmic Web (Distributed Resilience):** Implements **Circuit Breakers** to isolate failing upstream dependencies and **Exponential Backoff Reconnect Loops** to revive degraded database connections autonomously.
+6. **The Cosmic Web (Distributed Resilience):** Implements **Circuit Breakers (G24)** to isolate failing upstream dependencies and **Exponential Backoff Reconnect Loops** to revive degraded database connections autonomously.
 7. **Cosmic Microwave Background (Forensic Observability & RUM):** Every user action leaves a forensic signature. Real User Monitoring (RUM), global runtime exception traps, 404 tracking, and immediate alerting dispatch to the incident response center.
 
 ---
@@ -78,28 +78,28 @@ An asteroid obeys the exact same gravitational laws as a galaxy; however, archit
 
 ---
 
-## MAPPING MATRIX: AUM-IC 7 vs. PUF-23
+## MAPPING MATRIX: AUM-IC 7 vs. PUF-25
 
-| Cosmic Force (AUM-IC) | Certifying PUF-23 Gates | Operational Objective |
+| Cosmic Force (AUM-IC) | Certifying PUF-25 Gates | Operational Objective |
 | :--- | :--- | :--- |
 | **Fundamental Hygiene** | **`G0`**, **`G8`**, **`G22`** | Pure UTF-8 encoding, LF line endings, mojibake eradication, and universal delimiter balance. |
-| **Hadron Collider** | **`G2`**, **`G3`**, **`G5`**, **`G6`** | Red/Green test cycle, SHA-256 rollback snapshots, and strict multi-language static analysis. |
+| **Hadron Collider** | **`G2`**, **`G3`**, **`G5`**, **`G6`**, **`G23`** | Red/Green test cycle, SHA-256 rollback snapshots, strict static analysis, and mutation test resilience. |
 | **Magnetic Field** | **`G4`**, **`G19`**, **`G21`** | Pure logic refactor, zero SQL injection, secret purge, and WordPress/WooCommerce compliance. |
 | **Event Horizon** | **`G9`**, **`G17`**, **`G20`** | POSIX permissions, license integrity, and environment isolation (zero localhost in production). |
 | **Zero Gravity & Layout** | **`G1`**, **`G11`**, **`G18`** | UI thread decoupling, zero-focus stealing (`CREATE_NO_WINDOW`), and clean styling engine consistency. |
-| **Cosmic Web & Routing** | **`G12`**, **`G13`**, **`G14`** | Dead link eradication (no 404s), zombie UI action removal, and HTTP client/server contract checks. |
+| **Cosmic Web & Resilience** | **`G12`**, **`G13`**, **`G14`**, **`G24`** | Dead link eradication (no 404s), zombie UI action removal, HTTP contracts, and chaos fault isolation. |
 | **Background Radiation** | **`G7`**, **`G10`**, **`G15`**, **`G16`** | ADR logging in `BITACORA.md`, stale cache flushes, E2E validation, and Core Web Vitals audit. |
 
 ---
 
 ## TACTICAL GLOSSARY: THE "WHY" BEHIND THE RULES
 
-* **Why ban raw string-concatenated SQL queries?**  
-  Concatenating unchecked input into SQL statements disables your Magnetic Field, allowing trivial SQL injections to alter and compromise the integrity of relational data.
+* **Why audit Mutation Testing Resilience (G23)?**  
+  High test coverage with empty or tautological assertions is a dangerous illusion. G23 enforces that assertions genuinely evaluate state deviations, ensuring mutants are actively killed.
+* **Why audit Chaos Fault Injection and Circuit Breakers (G24)?**  
+  In distributed software, remote API and database delays are mathematically inevitable. G24 verifies that network queries include timeouts and circuit breakers, preventing whole-system lockups.
 * **Why capture immutable SHA-256 checkpoints (G3)?**  
   Modifying code without verified checkpoints introduces irreversible entropy. An atomic cryptographic snapshot guarantees that any failed remediation step can be immediately collapsed and restored.
-* **Why terminate listeners and decouple UI timers (G1 and G11)?**  
-  Background daemons or WebSockets left running without lifecycle bounds become rogue objects leaking memory RAM indefinitely, causing system freezing and ruining desktop ergonomics.
 
 ---
 

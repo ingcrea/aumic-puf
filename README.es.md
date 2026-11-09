@@ -1,12 +1,12 @@
-# AUM-IC PUF — Protocolo Universal contra Fallos (PUF-23)
+# AUM-IC PUF — Protocolo Universal contra Fallos (PUF-25)
 
 [![Licencia AGPL-3.0](https://img.shields.io/badge/licencia-AGPL--3.0-blue.svg)](LICENSE)
 [![Estándar AUM-IC 7:2026](https://img.shields.io/badge/est%C3%A1ndar-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
-[![npm version](https://img.shields.io/badge/npm-v3.2.1-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
+[![npm version](https://img.shields.io/badge/npm-v3.3.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
 
 > 🌐 **Navegación:** 🇲🇽 [Leer en Español](./README.es.md) | 🇺🇸 [Read in English](./README.md) | 📜 [Manifiesto (ES)](./MANIFEST.es.md) | 📜 [Manifesto (EN)](./MANIFEST.md) | 🌌 [Estándar AUM-IC 7](https://github.com/ingcrea/aum-ic)
 
-Suite oficial de aseguramiento determinista de calidad y orquestador multi-lenguaje de 23 compuertas (G0 a G22) bajo el estándar **AUM-IC 7:2026**, diseñado y mantenido por **Ingeniería Creativa (IngCrea)**.
+Suite oficial de aseguramiento determinista de calidad y orquestador multi-lenguaje de 25 compuertas (G0 a G24) bajo el estándar **AUM-IC 7:2026**, diseñado y mantenido por **Ingeniería Creativa (IngCrea)**.
 
 ---
 
@@ -16,16 +16,17 @@ El Protocolo Universal contra Fallos (PUF) no es un linter superficial ni una co
 
 Opera de forma agnóstica a través de adaptadores especializados para **Rust, TypeScript/JavaScript, Astro, Next.js, Python, PHP, Java/JVM, C#, C/C++, Flutter/Dart y Shell**, garantizando cumplimiento riguroso con normativas internacionales de fiabilidad (**ISO/IEC 25010**), seguridad de la información (**ISO 27001**) y testabilidad (**ISO 29119**).
 
-### Características Clave del Motor v3.2.1
+### Características Clave del Motor v3.3.0
 
-* **Snapshot VFS en Memoria (`LectorArbolProyecto`):** Mapeo virtual del sistema de archivos con caché volátil estructurado. Permite que múltiples compuertas analicen el repositorio de forma concurrente sin provocar saturación de I/O en disco.
+* **Snapshot VFS en Memoria (`LectorArbolProyecto`):** Mapeo virtual del sistema de archivos con caché volátil estructurado. Permite que las 25 compuertas analicen el repositorio de forma concurrente sin provocar saturación de I/O en disco.
 * **Persistencia Forense Indexada (`RepositorioSqliteAudit`):** Almacenamiento nativo en SQLite (`.aumic/puf_audit.sqlite`) de cada ejecución, registrando métricas de latencia, violaciones detectadas y telemetría histórica con tiempos de consulta inferiores a 20 ms.
+* **Testing Avanzado Integrado:** Incorpora pruebas de resistencia a mutaciones (G23) e inyección de caos con validación de disyuntores de red (G24).
 * **Perfiles Dinámicos de Auditoría (`--profile`):** Flexibilidad de inspección según el ciclo de entrega (`enterprise`, `mvp`, `dev`, `security`).
 * **Zero-Black-Box Telemetry:** Reportes forenses interactivos en HTML (`puf-report.html`) con diagramas SVG gauge, tarjetas KPI de impacto y trazabilidad exacta de archivo y línea.
 
 ---
 
-## Matriz Exhaustiva de las 23 Compuertas de Calidad (G0 a G22)
+## Matriz Exhaustiva de las 25 Compuertas de Calidad (G0 a G24)
 
 ### G0: Higiene Forense Anti-Entropía y Codificación Pura (In-Process Sanitizer)
 * **Para qué sirve:** Garantiza que ningún byte corrupto, BOM invisible o secuencia de caracteres rotos ingrese al flujo de desarrollo.
@@ -37,7 +38,7 @@ Opera de forma agnóstica a través de adaptadores especializados para **Rust, T
 
 ### G2: Test de Reproducción — Fase Roja (Reproduction Test-First)
 * **Para qué sirve:** Erradica correcciones a ciegas y asunciones subjetivas al resolver anomalías.
-* **Qué hace:** Exige la existencia o creación previa de una prueba automatizada (unitaria, funcional o de integración) que replique con fidelidad el defecto reportado. El motor verifica que el test falle inequívocamente contra el código base actual (*Estado Rojo*) antes de permitir cualquier mutación de lógica.
+* **Qué hace:** Exige la existencia o creación previa de una prueba automatizada (unitaria, funcional o basada en propiedades) que replique con fidelidad el defecto reportado. El motor verifica que el test falle inequívocamente contra el código base actual (*Estado Rojo*) antes de permitir cualquier mutación de lógica.
 
 ### G3: Checkpoint Inmutable de Estado (State Snapshot Guard)
 * **Para qué sirve:** Otorga inmunidad frente a pérdidas de código o regresiones destructivas durante una reparación.
@@ -137,6 +138,16 @@ Opera de forma agnóstica a través de adaptadores especializados para **Rust, T
   * Audita la integridad de archivos JSON (detectando comas faltantes o trailing commas no permitidas).
   * Evalúa el balanceo perfecto de delimitadores (`{ }`, `[ ]`, `( )`), ignorando inteligentemente literales de cadenas, comentarios y expresiones regulares para reportar la línea precisa de cualquier desbalance.
 
+### G23: Resistencia a Mutaciones y Aserciones Vacías (Mutation Resilience Guard)
+* **Para qué sirve:** Erradica el falso confort de suites con 100% de cobertura que no tienen capacidad real de atrapar fallos lógicos.
+* **Qué hace:** Audita la efectividad de las pruebas evaluando si las aserciones son vacías, complacientes o tautológicas (`expect(true).toBe(true)`). Comprueba que los tests sometan el código a validaciones de estado reales que fallen obligatoriamente si un operador lógico, aritmético o de bifurcación es alterado en la lógica intervenida.
+
+### G24: Inyección de Caos, Disyuntores y Auto-Sanación (Chaos & Fault Injection Guard)
+* **Para qué sirve:** Garantiza que la aplicación sobreviva a la latencia extrema, micro-cortes y caídas de servicios externos sin colapsar el sistema operativo ni el proceso principal.
+* **Qué hace:** Inspecciona la arquitectura de transporte HTTP y conexiones a bases de datos en busca de vulnerabilidades ante fallas de red:
+  * Detecta invocaciones cliente sin timeouts explícitos ni señales de aborto (`AbortController`).
+  * Verifica la implementación de **Disyuntores (Circuit Breakers)** y bucles de reintento con retroceso exponencial (**Exponential Backoff**) para aislar dependencias degradadas y permitir la auto-recuperación sin intervención humana.
+
 ---
 
 ## Perfiles Dinámicos de Auditoría (`--profile`)
@@ -145,10 +156,10 @@ Para optimizar pipelines de integración continua o verificaciones rápidas ante
 
 | Perfil | Compuertas Evaluadas | Caso de Uso |
 | :--- | :--- | :--- |
-| **`enterprise`** *(Predeterminado)* | **G0 a G22 (23 compuertas)** | Certificación integral obligatoria previa a releases y despliegues productivos. |
+| **`enterprise`** *(Predeterminado)* | **G0 a G24 (25 compuertas)** | Certificación integral obligatoria previa a releases y despliegues productivos. |
 | **`mvp`** | `G0`, `G4`, `G6`, `G8`, `G22` | Verificación ágil de prototipos rápidos: higiene, lógica limpia, tipado estricto y sintaxis. |
 | **`dev`** | `G0`, `G4`, `G6`, `G8`, `G22` | Ciclo de desarrollo local ultrarrápido sin bloqueos por suites accesorias. |
-| **`security`** | `G0`, `G8`, `G9`, `G17`, `G19`, `G20` | Auditoría de ciberseguridad, permisos POSIX, blindaje legal, topología y cero inyecciones. |
+| **`security`** | `G0`, `G8`, `G9`, `G17`, `G19`, `G20`, `G24` | Auditoría de ciberseguridad, permisos POSIX, blindaje legal, topología, cero inyecciones y resiliencia ante caos. |
 
 ---
 
@@ -168,7 +179,7 @@ npx @ingcrea/aumic-puf auditar
 
 #### 1. Auditoría Completa de la Matriz (Enterprise)
 ```bash
-# Audita las 23 compuertas de calidad concurrentemente en el directorio actual
+# Audita las 25 compuertas de calidad concurrentemente en el directorio actual
 puf auditar
 
 # Ejecución fail-fast (aborta de inmediato al primer fallo detectado)
@@ -180,7 +191,7 @@ puf auditar --fast
 # Auditoría rápida para entornos de desarrollo local
 puf auditar --profile=dev
 
-# Auditoría estricta de seguridad perimetral
+# Auditoría estricta de seguridad perimetral y resiliencia
 puf auditar --profile=security
 
 # Auditoría ligera de entrega rápida (MVP)
@@ -189,20 +200,20 @@ puf auditar --profile=mvp
 
 #### 3. Auditoría Focalizada por Compuertas
 ```bash
-# Evalúa únicamente higiene forense, compliance de WordPress y sintaxis universal
-puf auditar -g G0,G21,G22
+# Evalúa mutaciones, resiliencia ante caos y compliance WordPress
+puf auditar -g G21,G23,G24
 
-# Evalúa seguridad y topología de red
-puf auditar -g G9,G19,G20
+# Evalúa higiene forense y sintaxis universal
+puf auditar -g G0,G8,G22
 ```
 
 #### 4. Gestión de Incidentes y Reversión Atómica
 ```bash
 # Inicia un incidente (genera andamio de test G2 y captura checkpoint inmutable G3)
-puf iniciar INC-104 "Corrección de cálculo en pasarela de pagos" src/checkout.ts
+puf iniciar INC-105 "Blindaje de resiliencia en pasarela" src/checkout.ts
 
 # Reversión de emergencia a partir del checkpoint SHA-256 en caso de error
-puf revertir INC-104 src/checkout.ts
+puf revertir INC-105 src/checkout.ts
 ```
 
 #### 5. Blindaje de Repositorio Git (Pre-commit Hook)
@@ -228,7 +239,7 @@ puf --version
 El repositorio incluye la plantilla oficial [`puf-github-action.yml`](puf-github-action.yml). Para blindar cualquier repositorio en GitHub:
 
 ```yaml
-name: Certificación AUM-IC PUF-23
+name: Certificación AUM-IC PUF-25
 on: [push, pull_request]
 
 jobs:

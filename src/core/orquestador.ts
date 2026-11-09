@@ -23,6 +23,8 @@ import { EvaluadorCiberseguridad } from './evaluador-ciberseguridad.js';
 import { EvaluadorTopologia } from './evaluador-topologia.js';
 import { EvaluadorWpWoo } from './evaluador-wp-woo.js';
 import { EvaluadorSintaxisUniversal } from './evaluador-sintaxis.js';
+import { EvaluadorMutacion } from './evaluador-mutacion.js';
+import { EvaluadorCaos } from './evaluador-caos.js';
 import { RepositorioSqliteAudit } from './repositorio-sqlite.js';
 import { LinterCssInline } from './linter-inline-css.js';
 import { SelectorAdaptador } from '../adapters/selector.js';
@@ -421,6 +423,14 @@ export class OrquestadorPUF15 {
       return EvaluadorSintaxisUniversal.auditar(this.directorioRaiz);
     };
 
+    const evaluarG23 = async (): Promise<RegistroCompuerta> => {
+      return EvaluadorMutacion.auditar(this.directorioRaiz);
+    };
+
+    const evaluarG24 = async (): Promise<RegistroCompuerta> => {
+      return EvaluadorCaos.auditar(this.directorioRaiz);
+    };
+
     const mapaEvaluadores: Record<string, () => Promise<RegistroCompuerta>> = {
       G0: evaluarG0,
       G1: evaluarG1,
@@ -445,6 +455,8 @@ export class OrquestadorPUF15 {
       G20: evaluarG20,
       G21: evaluarG21,
       G22: evaluarG22,
+      G23: evaluarG23,
+      G24: evaluarG24,
     };
 
     // Si se especifica filtro de compuertas particulares
@@ -452,7 +464,7 @@ export class OrquestadorPUF15 {
       const compuertasObjetivo = opciones.compuertasAFiltrar.map((id) => id.toUpperCase().trim());
       const compuertasValidas = compuertasObjetivo.filter((id) => mapaEvaluadores[id]);
       if (compuertasValidas.length === 0) {
-        throw new Error("Ninguna de las compuertas solicitadas es valida. Compuertas soportadas: G0 a G22.");
+        throw new Error("Ninguna de las compuertas solicitadas es valida. Compuertas soportadas: G0 a G24.");
       }
       const tareasFiltradas = compuertasValidas.map((id) => mapaEvaluadores[id]!());
 
@@ -494,6 +506,7 @@ export class OrquestadorPUF15 {
         evaluarG7(), evaluarG8(), evaluarG9(), evaluarG10(), evaluarG11(),
         evaluarG12(), evaluarG13(), evaluarG14(), evaluarG15(), evaluarG16(),
         evaluarG17(), evaluarG18(), evaluarG19(), evaluarG20(), evaluarG21(), evaluarG22(),
+        evaluarG23(), evaluarG24(),
       ]);
       if (opciones.onProgreso) tareasRapidas.forEach((r) => opciones.onProgreso!(r));
 
@@ -518,6 +531,7 @@ export class OrquestadorPUF15 {
       evaluarG7(), evaluarG8(), evaluarG9(), evaluarG10(), evaluarG11(),
       evaluarG12(), evaluarG13(), evaluarG14(), evaluarG15(), evaluarG16(),
       evaluarG17(), evaluarG18(), evaluarG19(), evaluarG20(), evaluarG21(), evaluarG22(),
+      evaluarG23(), evaluarG24(),
     ]);
 
     const compuertasTotales = [g6, ...resto];

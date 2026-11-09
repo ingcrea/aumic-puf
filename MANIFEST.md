@@ -1,64 +1,106 @@
-
-# 🌌 AUM-IC 7 Standard (2026 Edition)
-**Multidimensional Universe Architecture - Engineering Standard**
+# 📜 ARCHITECTURAL MANIFESTO: AUM-IC 7 STANDARD (2026 EDITION)
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-7.0.0-crimson?style=flat-square" alt="Version 7.0.0">
-  <img src="https://img.shields.io/badge/nature-Clean%20Architecture%20Standard-38bdf8?style=flat-square" alt="Nature">
+  <img src="https://img.shields.io/badge/nature-Pure%20Engineering%20Standard-38bdf8?style=flat-square" alt="Nature">
+  <img src="https://img.shields.io/badge/suite-PUF--23%20Assurance-gold?style=flat-square" alt="PUF-23">
 </p>
 
 > 🌐 **Navigation:** 🇺🇸 [Read in English](./MANIFEST.md) | 🇲🇽 [Leer en Español](./MANIFEST.es.md) | 📖 [README (EN)](./README.md) | 📖 [README (ES)](./README.es.md) | 🌌 [AUM-IC 7 Standard](https://github.com/ingcrea/aum-ic)
 
-## THE PARADIGM
-AUM-IC is not just a folder structure. It is a universal framework of laws that governs software behavior, drawing parallels from quantum mechanics and astrophysics to deliver **Military-Grade Security, High Availability (SRE), and Fractal Scalability**.
+This document governs the **Multidimensional Universe Architecture Paradigm (AUM-IC 7 Standard)** and its operational correspondence with the 23-gate matrix of the **Universal Failure Prevention Protocol (PUF-23)**.
 
-### 1. ⚛️ Atomic Physics (The Structure)
-Software must follow fractal symmetry.
-- `1-atoms`: The irreducible elements (Buttons, Inputs).
-- `2-molecules`: Simple compositions (Form Fields).
-- `3-cells`: Reusable blocks (Cards, Navbars).
-- `4-organisms`: Self-contained features (Login Form).
-- `5-planets`: Full views or screens (Dashboard).
-- `6-layouts`: The spatial grid that holds planets.
-
-### 2. 🌌 The 7 Cosmic Forces (SRE & Security Core)
-AUM-IC defines 7 laws that must govern the software's execution engine:
-
-1. **Dark Matter (Global State):** The invisible gravitational pull. State (like Redux or Zustand) connects organisms without direct coupling.
-2. **Event Horizon (Perimeter Security):** The impenetrable border. Enforces **CSP (Content Security Policy)**, strict Rate Limiting, and JWT signatures. If a request lacks proper spectral signatures, the Middleware rejects it instantly.
-3. **Magnetic Field (ORM & Sanitization):** Protects the core from cosmic radiation (SQL Injection). Raw SQL is forbidden. Additionally, matter is never truly destroyed: **Soft Deletes** and declarative schema Migrations are mandatory.
-4. **The Hadron Collider (CI/CD Testing):** Chaos does not enter Production. Before deploying, the pipeline mandates **CVE Vulnerability Audits** (Supply Chain Defense) and deterministic tests.
-5. **Wormholes (Cache & Offline-First):** Bypasses the speed of light. Uses local SQLite/Realm databases for Desktop/Mobile or Redis for Web, ensuring the system survives network outages.
-6. **The Cosmic Web (Resilience):** For massive systems. Implements **Circuit Breakers** to cut off failing external APIs and **Exponential Reconnect Loops** to revive database connections autonomously.
-7. **Cosmic Microwave Background (RUM Observability):** Every action leaves a forensic trace. Enforces **Real User Monitoring (RUM)**, catching global browser exceptions, dead clicks, and 404s, sending real-time alerts to the command center (SOC 2 Compliance).
+It is neither an arbitrary folder recommendation nor a cosmetic convention: it is a deterministic framework of architecture, fractal symmetry, and software physics engineered to inherently satisfy international product quality (**ISO/IEC 25010**), information security (**ISO 27001**), testability (**ISO 29119**), and web accessibility standards (**ISO 40500 / WCAG 2.2**).
 
 ---
 
-## PART VI: THE LAW OF CORRESPONDENCE (Critical Mass Scalability)
-"As above, so below." AUM-IC obeys the Hermetic Law of Correspondence: an asteroid obeys the same physics as a galaxy, but forces ignite proportionally to their **Critical Mass**.
+## 🌌 The Fundamental Philosophy: Entropy vs. Mathematical Precision
+
+**Human software development without discipline is uncontrolled entropy.** It degrades into chaotic sprawl: circular imports, shallow monkey-patches, toxic coupling, memory leaks, and services collapsing under unanticipated concurrency spikes.
+
+The physical universe, while seemingly chaotic, operates under immutable mathematical laws. From elementary quantum interactions to massive planetary mechanics, nothing is left to chance.
+
+**The AUM-IC Paradigm binds software to these same universal laws.** It serves as an absolute mental model, **100% language-agnostic** (Rust, TypeScript, Python, Astro, PHP, Java, C#, Swift, Shell), categorizing systems into **Observable Matter** (fractal codebase structure), **Invisible Forces** (data flow and SRE resilience), and **Laws of Correspondence** (critical mass scalability).
+
+---
+
+## PART I: OBSERVABLE MATTER (Fractal Code Structure)
+
+The Hermetic Principle of Correspondence dictates: *"As above, so below"*. Software components are arranged in strict fractal symmetry across the UI, API Controllers, and Persistence layers:
+
+```text
+src/
+├── 1-atoms/       # Irreducible elements (Buttons, pure math helpers, primitives)
+├── 2-molecules/   # Simple composite groups (Form fields with label/error, middlewares)
+├── 3-cells/       # Functional interactive containers (Cards, ORM entities, unitary services)
+├── 4-organisms/   # Autonomous business modules (Checkout flows, domain use-cases, orchestrators)
+├── 5-planets/     # Full application views or API controllers (Dashboard screens, REST/gRPC handlers)
+└── 6-layouts/     # Structural gravitational grid (Master templates, server bootstrap modules)
+```
+
+* **Zero-Gravity Rule:** Atoms (`1-atoms/`) must remain entirely stateless and cannot import higher-level modules, state managers, or database connections. Gravitational mass and logic density are reserved strictly for organisms and planets.
+
+---
+
+## PART II: THE 7 COSMIC FORCES (SRE & Security Core)
+
+Every production system must enforce 7 dynamic laws governing data flow and runtime resilience:
+
+1. **Dark Matter (Global State):** The invisible gravitational bond. Global application state (Zustand, Redux, background memory daemons) connects organisms without toxic coupling (*Prop Drilling is strictly forbidden*).
+2. **Event Horizon (Perimeter Security):** The impenetrable boundary. Enforces strict Content Security Policy (CSP), rate limiting, bot challenges, and cryptographic JWT verification. Any payload lacking a valid spectral signature is rejected at the middleware gateway.
+3. **Magnetic Field (ORM & Sanitization):** Shields the system core against cosmic radiation (SQL Injections and XSS attacks). Raw unparameterized SQL strings are banned. Matter cannot be arbitrarily destroyed: **Soft Deletes** and declarative schema migrations are mandatory.
+4. **The Hadron Collider (PUF-23 Closed-Loop Assurance):** Chaos does not enter production. Prior to any release, code must clear the 23-gate matrix (**G0 to G22**), auditing everything from raw byte hygiene to API contracts and licensing compliance.
+5. **Wormholes (Cache & Offline-First Architecture):** Defeats network latency. Employs embedded local databases (SQLite, Realm) in desktop/mobile apps or distributed Redis clusters in cloud backends, guaranteeing uninterrupted operation and transactional capability during network dropouts.
+6. **The Cosmic Web (Distributed Resilience):** Implements **Circuit Breakers** to isolate failing upstream dependencies and **Exponential Backoff Reconnect Loops** to revive degraded database connections autonomously.
+7. **Cosmic Microwave Background (Forensic Observability & RUM):** Every user action leaves a forensic signature. Real User Monitoring (RUM), global runtime exception traps, 404 tracking, and immediate alerting dispatch to the incident response center.
+
+---
+
+## PART III: LAW OF CORRESPONDENCE (Critical Mass Scalability)
+
+An asteroid obeys the exact same gravitational laws as a galaxy; however, architectural forces ignite proportionally to the system's **Critical Mass**:
 
 ### 🪨 Level 1: The Asteroid (Single-Purpose Systems)
-* **Examples:** Landing Pages, CLI Scripts, Utility Mobile Apps.
-* **Dark Matter (State):** **OFF.**
-* **Perimeter Magnetic Field:** **MAXIMUM.** Inputs are deadly. Web requires invisible challenge filters (WAF/CAPTCHAs). Desktop/Mobile requires strict biometric validation or Zod sanitization.
-* **The Biosphere (Accessibility/SEO):** **MAXIMUM.** Semantic HTML or native OS Accessibility APIs (VoiceOver/TalkBack).
+* **Examples:** Landing pages, CLI utilities, single-screen mobile apps.
+* **Dark Matter (Global State):** **OFF.** No heavy stores needed; state lives locally.
+* **Perimeter Magnetic Field:** **MAXIMUM.** External input is lethal. Applies strict schema validation (Zod, TypeBox, serde) and bot challenges.
+* **The Biosphere (Accessibility & SEO):** **MAXIMUM.** Semantic HTML structure and native OS accessibility APIs (VoiceOver/TalkBack).
 
 ### 🌍 Level 2: The Planet (Transactional Systems)
-* **Examples:** E-Commerce, Local POS Systems, Transactional Apps.
-* **Wormholes (Cache & Offline-First):** **ON.** Local DBs (SQLite) keep the system running during outages.
-* **Spectral Signatures (Auth):** **ON.** Secrets saved in OS Keychains or secure HttpOnly cookies.
+* **Examples:** E-Commerce platforms, Point of Sale (POS) applications, transactional mobile apps.
+* **Wormholes (Offline-First):** **ON.** Local SQLite databases keep the business running during internet outages.
+* **Spectral Signatures (Auth):** **ON.** Secrets saved in OS Keychains, Windows Credential Manager, or secure HttpOnly cookies. Plaintext credential storage is banned.
 
 ### 🌌 Level 3: The Galaxy (Massive Ecosystems)
-* **Examples:** Cloud ERPs, Core Banking, Heavy Desktop Suites.
-* **The Cosmic Web (Microservices/IPC):** **ON.**
-* **Telemetry & Dark Matter:** **MAXIMUM.**
+* **Examples:** Cloud ERP systems, Core Banking, high-performance desktop suites.
+* **The Cosmic Web (IPC & Microservices):** **MAXIMUM POWER.** Typed asynchronous messaging and decoupled execution threads.
+* **Forensic Telemetry & Observability:** **MAXIMUM POWER.** Real-time log aggregation, distributed tracing, and automated failure isolation.
 
 ---
 
-## TACTICAL GLOSSARY (The "Why")
-* **Why use an ORM always?** Writing Raw SQL is shutting down your magnetic field. Cosmic rays (SQL Injections) will fry your core, whether on an AWS cluster or a local cash register POS.
-* **When to Commit?** Never "at the end of the day." Commit the millisecond an atom achieves mathematical stability (Green Test). It is a temporal save point in the multiverse.
-* **Why destroy Listeners?** A background worker or WebSocket that isn't explicitly closed becomes a "Rogue Planet" causing Memory Leaks until it crashes the user's OS.
+## MAPPING MATRIX: AUM-IC 7 vs. PUF-23
+
+| Cosmic Force (AUM-IC) | Certifying PUF-23 Gates | Operational Objective |
+| :--- | :--- | :--- |
+| **Fundamental Hygiene** | **`G0`**, **`G8`**, **`G22`** | Pure UTF-8 encoding, LF line endings, mojibake eradication, and universal delimiter balance. |
+| **Hadron Collider** | **`G2`**, **`G3`**, **`G5`**, **`G6`** | Red/Green test cycle, SHA-256 rollback snapshots, and strict multi-language static analysis. |
+| **Magnetic Field** | **`G4`**, **`G19`**, **`G21`** | Pure logic refactor, zero SQL injection, secret purge, and WordPress/WooCommerce compliance. |
+| **Event Horizon** | **`G9`**, **`G17`**, **`G20`** | POSIX permissions, license integrity, and environment isolation (zero localhost in production). |
+| **Zero Gravity & Layout** | **`G1`**, **`G11`**, **`G18`** | UI thread decoupling, zero-focus stealing (`CREATE_NO_WINDOW`), and clean styling engine consistency. |
+| **Cosmic Web & Routing** | **`G12`**, **`G13`**, **`G14`** | Dead link eradication (no 404s), zombie UI action removal, and HTTP client/server contract checks. |
+| **Background Radiation** | **`G7`**, **`G10`**, **`G15`**, **`G16`** | ADR logging in `BITACORA.md`, stale cache flushes, E2E validation, and Core Web Vitals audit. |
 
 ---
-> 🏛️ Intellectual Property of **Ingeniería Creativa (IngCrea)**. Standard released under CC BY-SA 4.0 / MIT.
+
+## TACTICAL GLOSSARY: THE "WHY" BEHIND THE RULES
+
+* **Why ban raw string-concatenated SQL queries?**  
+  Concatenating unchecked input into SQL statements disables your Magnetic Field, allowing trivial SQL injections to alter and compromise the integrity of relational data.
+* **Why capture immutable SHA-256 checkpoints (G3)?**  
+  Modifying code without verified checkpoints introduces irreversible entropy. An atomic cryptographic snapshot guarantees that any failed remediation step can be immediately collapsed and restored.
+* **Why terminate listeners and decouple UI timers (G1 and G11)?**  
+  Background daemons or WebSockets left running without lifecycle bounds become rogue objects leaking memory RAM indefinitely, causing system freezing and ruining desktop ergonomics.
+
+---
+
+> 🏛️ Intellectual Property of **Ingeniería Creativa (IngCrea)**. Standard released under dual CC BY-SA 4.0 / MIT licensing.

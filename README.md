@@ -1,254 +1,258 @@
-# AUM-IC PUF — Protocolo Universal contra Fallos (PUF-23)
+# AUM-IC PUF — Universal Failure Prevention Protocol (PUF-23)
 
-[![Licencia AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
-[![Estándar AUM-IC 7:2026](https://img.shields.io/badge/est%C3%A1ndar-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
-[![npm version](https://img.shields.io/badge/npm-v3.0.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
+[![AGPL-3.0 License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![AUM-IC 7:2026 Standard](https://img.shields.io/badge/standard-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
+[![npm version](https://img.shields.io/badge/npm-v3.2.1-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
 
-> Suite oficial de aseguramiento de calidad y orquestador determinista para facilitar el cumplimiento del estándar [AUM-IC 7:2026](https://github.com/ingcrea/aum-ic) por **Ingeniería Creativa (IngCrea)**.
+> 🌐 **Navigation:** 🇺🇸 [Read in English](./README.md) | 🇲🇽 [Leer en Español](./README.es.md) | 📜 [Manifesto (EN)](./MANIFEST.md) | 📜 [Manifiesto (ES)](./MANIFEST.es.md) | 🌌 [AUM-IC 7 Standard](https://github.com/ingcrea/aum-ic)
 
----
-
-## Matriz de 23 Compuertas de Calidad (G0 - G22)
-
-### 0. G0: Higiene Forense Anti-Entropía y Codificación Pura (aumic-sanitizer Audit)
-- **Alcance:** Diagnóstico in-process de mojibake, entropía de caracteres, saltos CRLF y codificación UTF-8 pura.
-
-### 1. G1: Mapeo de Comportamientos y Límites (Behavior & Boundary Mapping)
-- **Alcance:** Analizar el flujo completo de ejecución, ciclo de vida de la UI y desacoplamiento de hilos pesados.
-
-### 2. G2: Test de Reproducción — Fase Roja (Reproduction Test-First)
-- **Alcance:** Escribir y verificar test automatizado previo a tocar código de lógica (*Red State*).
-
-### 3. G3: Checkpoint Inmutable (State Snapshot)
-- **Alcance:** Respaldos atómicos con hash SHA-256 en `checkpoints/` para permitir reversión instantánea.
-
-### 4. G4: Reparación Focalizada y Cero CSS Inline (Pure Logic Refactor)
-- **Alcance:** Erradicación de causa raíz, cero código muerto y prohibición de atributos `style="..."` inline.
-
-### 5. G5: Validación de Test y No-Regresión — Fase Verde (Green State & Non-Regression)
-- **Alcance:** 100% de aserciones aprobadas y verificación perimetral contra regresiones colaterales.
-
-### 6. G6: Análisis Estático Estricto (Static Gate Multi-Ecosystem)
-- **Alcance:** Compiladores y linters en modo estricto (Rust, TypeScript, Python, PHP, Java, C#, C++, Swift, etc.).
-
-### 7. G7: Documentación Semántica y Registro ADR (Intent & Architecture Decision)
-- **Alcance:** Registro obligatorio de decisiones de arquitectura en `BITACORA.md`.
-
-### 8. G8: Aplanadora POSIX y Sanitización Anti-Mojibake
-- **Alcance:** Blindaje de bytes LF puros y UTF-8 estricto sin BOM.
-
-### 9. G9: Integridad Operativa, Permisos y Secretos Zero-Trust
-- **Alcance:** Permisos POSIX (644/755) y cero credenciales en texto plano.
-
-### 10. G10: Invalidación y Purga de Estado Efímero
-- **Alcance:** Purga de cachés de compilación (.next, .turbo, target, __pycache__, .phpunit.cache).
-
-### 11. G11: Ergonomía del SO, Foco de Ventanas y Aislamiento UI (Zero-Focus Stealing)
-- **Alcance:** Compuerta obligatoria contra robo de foco en Windows (`CREATE_NO_WINDOW`) e I/O desacoplado de loops UI.
-
-### 12. G12: Topología de Rutas Vivas & Dead Link Sweeper
-- **Alcance:** Detección de enlaces y destinos locales rotos en código web.
-
-### 13. G13: Grafo de Interactividad & Erradicación Zombie
-- **Alcance:** Erradicación de botones decorativos o handlers de eventos inertes.
-
-### 14. G14: Traza de Contratos HTTP & Endpoints Vivos
-- **Alcance:** Detección estática de contratos HTTP rotos o paths huérfanos.
-
-### 15. G15: Headless E2E Crawler & Runtime Exceptions
-- **Alcance:** Suites E2E (Playwright / Cypress) para verificación de flujo funcional.
-
-### 16. G16: Calidad Visual, Core Web Vitals y Auditoría Web (Lighthouse / CWV)
-- **Alcance:** Puntuación de experiencia de usuario, layouts DOM estables y Core Web Vitals.
-
-### 17. G17: Blindaje Legal, Integridad de Licencias y Compatibilidad (IP & License Guard)
-- **Alcance:** Consistencia entre manifiestos (`package.json`, `Cargo.toml`) y archivos `LICENSE`, titularidad y copyright.
-
-### 18. G18: Consistencia de Motores de Estilo y Erradicación de Antipatrones (Style Engine Consistency)
-- **Alcance:** Prevención de colisión entre frameworks (ej. Tailwind + Bootstrap) y control de deuda de `!important`.
-
-### 19. G19: Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)
-- **Alcance:** Erradicación de archivos expuestos (`.env`, `dump.sql`) y prevención de concatenación SQL directa.
-
-### 20. G20: Topología de Entornos, Aislamiento de Red y Cero Conexiones Fantasma (Topology Guard)
-- **Alcance:** Erradicación de referencias hardcodeadas a `localhost` / `127.0.0.1` en entornos de producción.
-
-### 21. G21: Cumplimiento Oficial WordPress & WooCommerce (WPCS & WC Guidelines)
-- **Alcance:** Auditoría estricta de sanitización de superglobales, prepared queries en `$wpdb`, compatibilidad obligatoria con High-Performance Order Storage (HPOS) y métodos CRUD canónicos de `WC_Order`.
-
-### 22. G22: Diagnóstico Universal de Sintaxis y Delimitadores (Universal Syntax Guard)
-- **Alcance:** Localización exacta de omisiones de punto y coma (`;`), comas en JSON y llaves/corchetes/paréntesis desbalanceados en memoria sin requerir compiladores externos.
+Official deterministic quality assurance engine and 23-gate universal multi-language orchestrator (G0 to G22) implementing the **AUM-IC 7:2026 Standard**, engineered and maintained by **Ingeniería Creativa (IngCrea)**.
 
 ---
 
-## Uso del Orquestador (CLI)
+## Engine Philosophy and Architecture
+
+The Universal Failure Prevention Protocol (PUF) is not a surface-level linter or a disjointed set of scripts. It is a **closed-loop deterministic audit engine** engineered to eradicate software entropy before code ever reaches production.
+
+Operating agnostically via specialized language adapters for **Rust, TypeScript/JavaScript, Astro, Next.js, Python, PHP, Java/JVM, C#, C/C++, Flutter/Dart, and Shell**, it enforces compliance with international reliability (**ISO/IEC 25010**), information security (**ISO 27001**), and testability (**ISO 29119**) benchmarks.
+
+### Key Engine Features in v3.2.1
+
+* **In-Memory VFS Snapshot (`LectorArbolProyecto`):** Structured volatile filesystem snapshot caching. Enables multiple gates to evaluate project structure and code concurrently with zero disk I/O bottleneck.
+* **Indexed Forensic Persistence (`RepositorioSqliteAudit`):** Native SQLite engine persistence (`.aumic/puf_audit.sqlite`) recording execution latency, identified infractions, and historical audit telemetry with sub-20ms query overhead.
+* **Dynamic Audit Profiles (`--profile`):** Adaptable gate execution matching pipeline requirements (`enterprise`, `mvp`, `dev`, `security`).
+* **Zero-Black-Box Telemetry:** Comprehensive HTML forensic dashboard (`puf-report.html`) complete with SVG compliance gauges, key impact KPI tiles, and pinpointed line-by-line violation reports.
+
+---
+
+## Comprehensive Matrix of Quality Gates (G0 to G22)
+
+### G0: Forensic Anti-Entropy & Encoding Hygiene (In-Process Sanitizer)
+* **Purpose:** Ensures zero corrupted bytes, phantom BOM markers, or invalid character sequences enter development streams.
+* **What it does:** Runs in-process memory diagnostics via `aumic-sanitizer`, auditing that 100% of codebase files maintain **pure UTF-8 without BOM** and POSIX Unix **LF (`\n`)** line breaks. Automatically purges mojibake artifacts and prevents cross-platform runtime discrepancies.
+
+### G1: Behavior & Boundary Mapping and UI Loop Isolation (Behavior & Boundary Mapping)
+* **Purpose:** Fortifies runtime state integrity and prevents UI starvation or application lockups.
+* **What it does:** Scans input contracts, signatures, and edge cases (`null`, `undefined`, `None`, empty strings, and numerical overflows). Strictly enforces that **no heavy disk I/O, synchronous commands, or network queries** run inside graphical UI timers or event callbacks (`slint::Timer`, `setInterval`, `requestAnimationFrame`), requiring delegation to detached asynchronous tasks or atomic memory caches.
+
+### G2: Reproduction Test-First — Red Phase (Reproduction Test-First)
+* **Purpose:** Prevents guesswork and subjective speculation during defect resolution.
+* **What it does:** Mandates the presence or authoring of an automated test (unit, integration, or CLI-driven) faithfully reproducing the reported flaw. Verifies that the test unmistakably fails against the current codebase (*Red State*) before any production code modification is allowed.
+
+### G3: Immutable State Checkpoint (State Snapshot Guard)
+* **Purpose:** Delivers immunity against destructive regressions or data loss during bug mitigation.
+* **What it does:** Generates an atomic timestamped backup inside `checkpoints/` (`<file>.bak_YYYYMMDDHHMMSS`) hashing its state with SHA-256. Enables instant, lossless rollbacks via `puf revertir` if a fix deviates from expectations.
+
+### G4: Pure Logic Refactor & Zero Inline CSS (Pure Logic Refactor)
+* **Purpose:** Guarantees root-cause remediation without quick hacks, dead code, or coupled styling debt.
+* **What it does:** Verifies that the patch addresses the root architectural flaw without producing side effects. Enforces clean-code practices per language (forbids unjustified `unwrap()` in Rust favoring `Result`/`Option`; mandates `declare(strict_types=1);` in PHP; separates frontmatter from JSX in Astro). Strictly bans inline `style="..."` attributes across HTML, JSX, PHP, or Astro, enforcing modular `.css` or `.scss` stylesheets.
+
+### G5: Test Validation & Non-Regression — Green Phase (Green State & Non-Regression)
+* **Purpose:** Mathematically validates defect resolution without adjacent module regressions.
+* **What it does:** Re-executes the automated test introduced in G2, validating 100% passing assertions (*Green State*). Concurrently executes perimetral test suites to ensure zero pre-existing system behaviors were degraded.
+
+### G6: Strict Static Analysis, Typing & Compiler Rigor (Static Gate Multi-Ecosystem)
+* **Purpose:** Zero tolerance for compiler warnings, implicit types, and build-time slips.
+* **What it does:** Executes official language toolchains under maximum rigor:
+  * **TypeScript / Astro:** `npx astro check`, `npx tsc --noEmit`, and zero ESLint warnings tolerated.
+  * **Rust:** `cargo check` and `cargo clippy -- -D warnings`.
+  * **Python:** `mypy --strict` and `ruff check`.
+  * **PHP:** `php -l` and `phpstan analyse --level=max`.
+  * **Java / JVM:** Validation across Maven (`mvn test-compile`), Gradle, or `javac`.
+  * **C# / .NET:** `dotnet build /warnaserror`.
+
+### G7: Semantic Architecture Documentation & ADR Logging (Intent & Architecture Decision)
+* **Purpose:** Safeguards technical memory and the rationale underlying design choices.
+* **What it does:** Audits code comments for design intent beyond syntactic operation. Validates the existence and updates of `BITACORA.md` in the project root adhering to the canonical format:
+  ```text
+  [Timestamp] | Context | Decision | Consequence
+  ```
+
+### G8: POSIX Squasher & Character Sanitization (POSIX Squasher)
+* **Purpose:** Prevents build breaks, noisy git diffs, and unexecutable scripts across Linux/Docker environments.
+* **What it does:** Sweeps all repository files in memory, squashing Windows CRLF (`\r\n`) line endings into POSIX Unix LF (`\n`) and wiping out non-compliant character artifacts.
+
+### G9: Operational Integrity, File Permissions & Zero-Trust Secrets (Ops Shield)
+* **Purpose:** Shields infrastructure against exposed credentials and risky filesystem permissions.
+* **What it does:** Inspects filesystem security modes (enforcing `644` for general files, `755` for directories/executables, and `600` for private credentials). Scans for hardcoded tokens, passwords, database credentials, or API keys in plaintext, forcing storage via environment variables or secret vaults.
+
+### G10: Ephemeral State Flush & Cache Invalidation (State Flush)
+* **Purpose:** Guarantees clients and developers consume fresh code, removing stale compilation artifacts.
+* **What it does:** Locates and purges build trees and local caches (`.next`, `.turbo`, `dist`, `target`, `__pycache__`, `.phpunit.cache`, `storage/framework/cache`), dispatching graceful worker restart notifications (PM2, Systemd, Gunicorn) as required.
+
+### G11: OS Ergonomics & Zero-Focus Stealing (Zero-Focus Stealing Guard)
+* **Purpose:** Prevents user distraction and jarring command prompt flickers in native environments.
+* **What it does:** In Windows desktop stacks, enforces that all native subprocess calls (`Command::new`, `powershell`, `cmd`, `exec`) supply `creation_flags(0x08000000)` (`CREATE_NO_WINDOW`), eliminating intrusive black console popups. Audits that repeated privilege lookups leverage atomic lazy caches (`AtomicU8` / `OnceLock`).
+
+### G12: Living Routes Topology & Dead Link Sweeper (Living Routes Gate)
+* **Purpose:** Eliminates 404 pages and dead local references prior to production deployment.
+* **What it does:** Scans web markup and templates (`.astro`, `.tsx`, `.jsx`, `.vue`, `.html`, `.php`), extracting `href`, `src`, `to`, and `action` parameters. Confirms that all relative local references resolve directly to physical assets on the filesystem.
+
+### G13: Living UI Actions Graph & Zombie Eradication (Living UI Actions Gate)
+* **Purpose:** Ensures interactive interface elements are functionally wired rather than purely decorative.
+* **What it does:** Statically evaluates UI code detecting zombie handlers (`onClick=""`, `onClick={undefined}`, `on:click=""`, `@click=""`, buttons missing actionable event bindings). Every control must lead to state mutation, API dispatch, modal presentation, or active user feedback.
+
+### G14: HTTP Contract Traceability & Living Endpoints (Living API Contract Gate)
+* **Purpose:** Prevents discrepancies between client-side requests and registered backend routes.
+* **What it does:** Tracks client HTTP invocations (`fetch(...)`, `axios.get/post/...`, `ky`), asserting that no unmapped endpoints, deprecated APIs, or broken relative routes are queried.
+
+### G15: Headless E2E Crawler & Runtime Exceptions (Headless Handshake Gate)
+* **Purpose:** Catches silent runtime crashes, unresponsive UI flows, and unhandled console errors.
+* **What it does:** Verifies the presence of E2E suites (Playwright `playwright.config.ts` or Cypress `cypress.config.ts`). If found, ensures deterministic invocation; if absent, flags the gate as `omitida` (skipped) with actionable recommendations without halting build certification.
+
+### G16: Visual Quality, Core Web Vitals & Web Audit (Lighthouse / CWV Guard)
+* **Purpose:** Enforces competitive search engine indexing and responsive, stutter-free user experiences.
+* **What it does:** Measures Core Web Vitals (LCP - Largest Contentful Paint, CLS - Cumulative Layout Shift, INP - Interaction to Next Paint), accessibility compliance (a11y), SEO architecture, and best practices. Enforces a minimum aggregate score of 70/100 from local audits (`aumic-live-report.json`) or live browser telemetry.
+
+### G17: Intellectual Property, License Integrity & Dependency Safety (IP & License Guard)
+* **Purpose:** Protects corporate software ownership and defends against open-source licensing infractions.
+* **What it does:** Validates alignment between package manifests (`package.json`, `Cargo.toml`, `composer.json`) and physical license files (`LICENSE`, `LICENSE.md`, `LICENSE-DOCS`). Purges unresolved license template placeholders (e.g. `<year>`, `<owner>`), checks third-party license compatibility, and provides non-blocking advisory modes for private client codebases.
+
+### G18: Style Engine Consistency & Antipattern Eradication (Style Engine Consistency)
+* **Purpose:** Maintains stylesheet predictability and avoids catastrophic layout engine collisions.
+* **What it does:** Detects mutually antagonistic styling frameworks (such as bundling Tailwind CSS and Bootstrap together). Audits stylesheet specificity debt, flagging projects where `!important` declarations exceed acceptable tolerance thresholds (maximum 5 justified usages).
+
+### G19: Attack Surface Shield & Zero Injection (Zero-Injection & Attack Surface Guard)
+* **Purpose:** Neutralizes common attack vectors and blocks credential exposure or database intrusion.
+* **What it does:** Inspects repository files ensuring no uncommitted database dumps (`dump.sql`, `backup.sql`), dangerous diagnostics (`phpinfo.php`, `xmlrpc.php`), or SSH private keys are exposed. Verifies `.env` files are strictly tracked inside `.gitignore`, and audits SQL execution against direct string concatenation, demanding parameterized queries or typed Query Builders.
+
+### G20: Environment Topology & Zero Cross-Contamination (Topology Guard)
+* **Purpose:** Prevents staging leaks and hardcoded developmental URLs in production releases.
+* **What it does:** Sweeps source files for hardcoded developmental endpoints (`http://localhost`, `127.0.0.1`), requiring full decoupling through dedicated environment variables configured per target infrastructure (`dev`, `staging`, `prod`).
+
+### G21: Official WordPress & WooCommerce Compliance (WPCS & WC Guidelines Guard)
+* **Purpose:** Enforces secure, HPOS-ready, and resilient coding standards in WordPress and WooCommerce ecosystems.
+* **What it does:** Activates automatically upon detecting WordPress/PHP codebases, running specialized inspection rules:
+  * **`WP-SEC-01` (Sanitization & Nonces):** Requires sanitization of superglobals (`$_GET`, `$_POST`, `$_REQUEST`) and CSRF defense via `check_admin_referer()` / `wp_verify_nonce()`.
+  * **`WP-SEC-02` (Prepared Queries):** Prohibits raw `$wpdb` queries missing `$wpdb->prepare()`.
+  * **`WC-HPOS-01` (Mandatory CRUD Orders):** Forbids direct `wp_postmeta` access for order management, enforcing canonical `WC_Order` CRUD methods (`$order->get_id()`, `$order->get_meta()`, `$order->update_meta_data()`, `$order->save()`).
+  * **`WC-CORE-01` (Deprecated Properties):** Flags legacy WooCommerce properties (such as accessing `$order->id` directly).
+  * **`WP-ROBUST-OPT-01` (Empty Coalesce Guard):** Detects fragile usage of the null coalescing operator `??` over configuration arrays where empty strings (`''`) bypass fallback defaults.
+  * **`WP-CIRCUIT-BREAKER-01` (Hardcoded Flags):** Identifies static boolean flags that silently obstruct transactional or payment processing pipelines.
+
+### G22: Universal Syntax, Delimiter & Balance Guard (Universal Syntax Guard)
+* **Purpose:** Diagnoses subtle syntax errors in milliseconds across diverse languages without external compilers.
+* **What it does:** Fast in-memory parsing engine covering PHP, CSS/SCSS, JSON, JavaScript, TypeScript, and Java:
+  * Spots missing semicolons (`;`) in PHP instructions and CSS/SCSS property declarations.
+  * Audits JSON integrity (detecting unescaped structures, missing commas, or trailing commas).
+  * Evaluates perfect bracket balance (`{ }`, `[ ]`, `( )`), smartly ignoring strings, inline comments, and regular expression literals to pinpoint the exact line of any imbalance.
+
+---
+
+## Dynamic Audit Profiles (`--profile`)
+
+To accelerate continuous integration pipelines and local pre-commit cycles, PUF provides four specialized execution profiles:
+
+| Profile | Evaluated Gates | Primary Use Case |
+| :--- | :--- | :--- |
+| **`enterprise`** *(Default)* | **G0 through G22 (All 23 Gates)** | Complete gate certification required prior to production release or distribution. |
+| **`mvp`** | `G0`, `G4`, `G6`, `G8`, `G22` | Rapid proof-of-concept audit: forensic hygiene, pure logic, strict static checks, and syntax. |
+| **`dev`** | `G0`, `G4`, `G6`, `G8`, `G22` | Lightning-fast local development loop without external dependency overhead. |
+| **`security`** | `G0`, `G8`, `G9`, `G17`, `G19`, `G20` | Specialized audit for infrastructure, file permissions, secret hygiene, topology, and injections. |
+
+---
+
+## Command Line Interface Manual (`puf` / `aumic-puf`)
+
+### Installation
 
 ```bash
-# Instalación global desde npm
+# Global installation from npm
 npm install -g @ingcrea/aumic-puf
 
-# Auditar todas las compuertas de la matriz (G0 a G22)
+# Or direct zero-install execution via npx
+npx @ingcrea/aumic-puf auditar
+```
+
+### Operational Commands
+
+#### 1. Full Matrix Audit (Enterprise)
+```bash
+# Concurrently evaluates all 23 quality gates across the current directory
 puf auditar
 
-# Auditar compuertas focalizadas (G0, G21, G22)
+# Fail-fast execution (immediately halts upon encountering the first failure)
+puf auditar --fast
+```
+
+#### 2. Dynamic Profile Auditing
+```bash
+# Fast local development check
+puf auditar --profile=dev
+
+# Dedicated security shield audit
+puf auditar --profile=security
+
+# Rapid prototype audit
+puf auditar --profile=mvp
+```
+
+#### 3. Granular Gate Targeting
+```bash
+# Run only encoding hygiene, WordPress compliance, and syntax checking
 puf auditar -g G0,G21,G22
 
-# Modo fail-fast (aborta al primer fallo detectado)
-puf auditar --fast
-
-# Consultar versión instalada
-puf -v
+# Run security, attack surface, and environment topology gates
+puf auditar -g G9,G19,G20
 ```
 
-### 1. G1: Mapeo de Comportamientos y Limites (Behavior & Boundary Mapping)
-- **Alcance:** Analizar el flujo completo de ejecucion y ciclo de vida de la UI.
-- **Acciones:**
-  - Identificar entradas, tipos, contratos, mutaciones y salidas esperadas.
-  - Definir formalmente casos de borde: valores nulos (`None`, `null`, `Option::None`), cadenas vacias, desbordamientos numericos, condiciones de carrera/concurrencia y accesos no autenticados.
-  - **Aislamiento del Bucle de UI:** Prohibido disparar I/O pesado, comandos o procesos sincronos dentro de temporizadores o callbacks de interfaz grafica (`slint::Timer`, `setInterval`, `requestAnimationFrame`). Deben delegarse a tareas de fondo asincronas o cachearse atomicamente.
-
-### 2. G2: Test de Reproduccion -- Fase Roja (Reproduction Test-First)
-- **Alcance:** Probar y demostrar empiricamente el defecto antes de tocar una sola linea de logica.
-- **Acciones:**
-  - Escribir un test automatizado (unitario, integracion o CLI determinista) que replique la falla reportada con fidelidad.
-  - Ejecutar el test y confirmar que falle contra el codigo actual (*Red State*).
-
-### 3. G3: Checkpoint Inmutable (State Snapshot)
-- **Alcance:** Blindaje de rollback y preservacion de estado pre-mutacion.
-- **Acciones:**
-  - Generar un respaldo atomico timestamped en `checkpoints/` (`<archivo>.bak_YYYYMMDDHHMMSS`).
-  - Registrar hash SHA-256 para permitir reversion instantanea sin perdida de informacion.
-
-### 4. G4: Reparacion Focalizada y Refactorizacion Limpia (Pure Logic Refactor)
-- **Alcance:** Correccion quirurgica de la causa raiz.
-- **Acciones:**
-  - Atacar la causa raiz sin parches superficiales. Cero codigo muerto, cero dependencias circulares.
-  - Cumplir principios de codigo limpio del stack correspondiente:
-    - **Rust:** Cero `unwrap()` no justificado; manejo exhaustivo con `Result` / `Option`.
-    - **Astro:** Componentes puros, separacion de logica frontmatter y JSX estatico/reactivo.
-    - **Python:** Tipado estricto (Type hints), PEP 8, manejo explicito de excepciones.
-    - **PHP:** POO fuertemente tipada, `declare(strict_types=1);`, inyeccion de dependencias.
-  - **Prohibicion Absoluta de CSS Inline:** Queda terminantemente prohibido inyectar `style="..."` en HTML/PHP/JSX/Astro. Si existen estilos inline preexistentes, refactorizarlos a archivos `.css`/`.scss`.
-
-### 5. G5: Validacion de Test y No-Regresion -- Fase Verde (Green State & Non-Regression)
-- **Alcance:** Verificacion de solucion completa y estabilidad perimetral.
-- **Acciones:**
-  - Reejecutar el test de G2 y validar el 100% de aserciones aprobadas (*Green State*).
-  - Ejecutar la suite de pruebas perimetral/completa para certificar cero regresiones colaterales.
-
-### 6. G6: Analisis Estatico, Tipado y Compilador Estricto (Static Gate)
-- **Alcance:** Tolerancia cero a advertencias del compilador o linters.
-- **Acciones:**
-  - Ejecutar compilador y analisis estatico en modo estricto segun el stack:
-    - **Rust:** `cargo clippy -- -D warnings` y `cargo check`.
-    - **Astro / TypeScript:** `npx astro check` y `npx eslint`.
-    - **Python:** `ruff check` y `mypy --strict`.
-    - **PHP:** `php -l` y `phpstan analyse --level=max`.
-  - Cero advertencias o errores tolerados.
-
-### 7. G7: Documentacion Semantica y Registro ADR (Intent & Architecture Decision)
-- **Alcance:** Memoria tecnica e intencion arquitectonica.
-- **Acciones:**
-  - Explicar en comentarios de codigo el *por que* de la decision y no solo el *que hace*.
-  - Registrar en `BITACORA.md` de la raiz del proyecto bajo el formato estricto:
-    ```
-    [Timestamp] | Contexto | Decision | Consecuencia
-    ```
-
-### 8. G8: Aplanadora POSIX y Sanitizacion Anti-Mojibake (aumic-sanitizer)
-- **Alcance:** Integridad de codificacion y terminacion de linea.
-- **Acciones:**
-  - Barrer los archivos con `node C:\Users\NexoRemoto\Proyectos\aumic-sanitizer\dist\index.js audit .`
-  - Purgar caracteres Mojibake forzando UTF-8 puro sin BOM.
-  - Aplanar y forzar saltos de linea Unix LF (`\n`), erradicando Windows CRLF (`\r\n`).
-
-### 9. G9: Integridad Operativa, Permisos y Secretos Zero-Trust (Ops Shield)
-- **Alcance:** Blindaje de infraestructura y seguridad de credenciales.
-- **Acciones:**
-  - Verificar permisos restrictivos en sistema de archivos (`chmod 644` archivos / `755` directorios, llaves SSH `600`).
-  - Cero credenciales, tokens o contrasenas en texto plano. Gestionar accesos via variables de entorno seguras o `SECRETOS.py`.
-
-### 10. G10: Invalidacion y Purga de Estado Efimero (State Flush)
-- **Alcance:** Consumo garantizado del codigo fresco en runtime.
-- **Acciones:**
-  - Purgar deterministamente cache de objetos (Redis, Memcached, Opcache, `.next`, `dist`).
-  - Reiniciar workers (Gunicorn, Systemd, SSR Node, PM2) para garantizar que los clientes consuman el codigo validado.
-
-### 11. G11: Blindaje de Ergonomia del SO, Foco de Ventanas y Aislamiento UI (OS & Desktop Ergonomics Gate)
-- **Alcance:** Experiencia de usuario inmaculada, ausencia total de robo de foco.
-- **Acciones:**
-  - **Inmunidad al Robo de Foco (Zero-Focus Stealing):** Toda invocacion de subprocesos en Windows (`Command::new`, `powershell`, `cmd`) DEBE incorporar `.creation_flags(0x08000000)` (`CREATE_NO_WINDOW`).
-  - **Zero-Ghost Processes:** Al cerrar la aplicacion, no deben quedar procesos huerfanos consumiendo CPU.
-  - **Cache de Consultas de Privilegios:** Usar cache atomico perezoso (`AtomicU8` / `OnceLock`), evitando invocaciones repetidas en bucles.
-
----
-
-### 12. G12: Topologia de Rutas Vivas & Dead Link Sweeper (Living Routes Gate)
-- **Alcance:** Integridad de navegacion sin pantallas 404 ni rutas huerfanas en Web (Astro, React, Next, Vue), Mobile (Flutter) y Desktop (Slint, C#/WPF, Tauri).
-- **Acciones:**
-  - Escanear los archivos HTML/JSX/Astro/PHP afectados con el metodo `auditarRutasVivas()` del adaptador.
-  - Detectar atributos `href`, `src`, `to`, `action` que apunten a rutas locales que no existen en el filesystem.
-  - Cero enlaces rotos hacia destinos locales inexistentes. Toda ruta relativa debe resolverse a un archivo real.
-  - El orquestador informa la lista exacta: `archivo.astro -> "/ruta/inexistente" (no existe en filesystem)`.
-  - **Solo aplica a extensiones web:** `.astro`, `.jsx`, `.tsx`, `.html`, `.php`, `.vue`, `.svelte`.
-
-### 13. G13: Grafo de Interactividad & Erradicacion Zombie (Living UI Actions Gate)
-- **Alcance:** Cero botones decorativos, pseudoelementos inertes o acciones no conectadas.
-- **Acciones:**
-  - Escanear los archivos web afectados con el metodo `auditarInteractividad()` del adaptador.
-  - Detectar patrones de handler inerte: `onClick=""`, `onClick={undefined}`, `on:click=""`, `@click=""`.
-  - Todo control interactivo debe resolver en un evento real (API call, modal, mutacion de estado o feedback visual).
-  - El orquestador reporta exactamente que archivo y linea contiene el handler zombie.
-  - **Solo aplica a extensiones web:** `.astro`, `.jsx`, `.tsx`, `.html`, `.php`, `.vue`, `.svelte`.
-
-### 14. G14: Traza de Contratos HTTP & Endpoints Vivos (Living API Contract Gate)
-- **Alcance:** Consistencia granular entre las llamadas del cliente y los controladores declarados en el backend.
-- **Acciones:**
-  - Analizar los archivos afectados buscando llamadas `fetch(...)` o `axios.get/post/...` con rutas hardcodeadas locales (no `/api/`, no variables de entorno `${}`).
-  - Cero llamadas HTTP a paths huerfanos o inexistentes detectados estaticamente.
-  - Si se detectan inconsistencias, listar exactamente el archivo y el endpoint problematico.
-
-### 15. G15: Headless E2E Crawler & Runtime Exceptions (Headless Handshake Gate)
-- **Alcance:** Deteccion de errores silenciosos, excepciones de runtime y bloqueos de interfaz.
-- **Acciones:**
-  - Verificar si existe suite E2E (Playwright `playwright.config.ts`, Cypress `cypress.config.ts`) en la raiz del proyecto.
-  - Si existe: marcar como **APROBADA** e instruir al Jefe Maestro a ejecutarla manualmente para certificacion completa.
-  - Si NO existe: marcar como **OMITIDA** (no bloquea certificacion) con recomendacion de configurar Playwright.
-  - **G15 OMITIDA no es un fallo:** `todasAprobadas` acepta tanto `aprobada` como `omitida`.
-
----
-
-## Reglas Inviolables de Ejecucion
-
-1. **Cero Complacencia:** No dejar tareas a medias ni usar marcadores vacios (`// el resto del codigo aqui`).
-2. **Determinismo Tecnico:** Todo entregable debe ser determinista, verificado en consola y listo para produccion.
-3. **Reporte por Compuerta:** Reportar siempre el estado de cada compuerta (G1 a G15) con su respectiva evidencia.
-4. **G15 es OMITIDA, no RECHAZADA:** Si no hay suite E2E, G15 se omite sin bloquear la certificacion.
-5. **G12 y G13 aplican solo a archivos web:** Para proyectos Rust/Python/Shell sin frontend, estas compuertas se aprueban automaticamente por ausencia de extensiones web en los archivos afectados.
-
-## Uso del Orquestador (CLI)
-
+#### 4. Incident Workflow & Rollback
 ```bash
-# Inicializar incidente (crea andamio G2 + checkpoints G3)
-puf iniciar INC-042 "Descripcion del fallo" src/archivo.ts
+# Initialize incident (generates G2 test harness and creates G3 immutable state snapshot)
+puf iniciar INC-104 "Payment gateway calculation fix" src/checkout.ts
 
-# Auditar las 15 compuertas concurrentemente
-puf auditar INC-042 src/archivo.ts
-
-# Modo fail-fast (aborta al primer fallo)
-puf auditar INC-042 src/archivo.ts --fast
-
-# Revertir a estado pre-fallo (usando checkpoint G3)
-puf revertir INC-042 archivo.ts
-
-# Instalar guardian de Git (pre-commit hook)
-puf instalar-hook
+# Lossless rollback to SHA-256 pre-mutation state
+puf revertir INC-104 src/checkout.ts
 ```
 
-## Licencia
+#### 5. Git Pre-Commit Hook Integration
+```bash
+# Installs native git hook at .git/hooks/pre-commit
+puf instalar-hook
 
-Distribuido bajo licencia **GNU Affero General Public License v3.0 (AGPL-3.0)**. Ver [LICENSE](LICENSE).
+# Git staged check: blocks commit if G4 (dead code/inline CSS) or G7 (ADR) are violated
+puf guard
+```
+
+#### 6. Version Inquiry
+```bash
+puf -v
+# or
+puf --version
+```
 
 ---
 
-**[Ingeniería Creativa](https://ingcrea.com)** | [Estándar AUM-IC](https://github.com/ingcrea/aum-ic)
+## Continuous Integration (GitHub Actions)
+
+The repository packages an official workflow template [`puf-github-action.yml`](puf-github-action.yml). To integrate into any GitHub repository:
+
+```yaml
+name: AUM-IC PUF-23 Certification
+on: [push, pull_request]
+
+jobs:
+  puf-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run PUF Audit
+        run: npx @ingcrea/aumic-puf auditar --profile=enterprise --fast
+```
+
+---
+
+## License & Intellectual Property
+
+Distributed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. Refer to [LICENSE](LICENSE) for full licensing terms, freedoms, and legal provisions.
+
+---
+
+**[Ingeniería Creativa (IngCrea)](https://ingcrea.com)** | [AUM-IC 7:2026 Standard](https://github.com/ingcrea/aum-ic)

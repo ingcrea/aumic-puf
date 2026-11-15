@@ -50,6 +50,7 @@ export class EvaluadorSanitizer {
           !a.rutaRelativa.startsWith('test') &&
           !a.rutaRelativa.startsWith('dist') &&
           !a.rutaRelativa.startsWith('.astro') &&
+          !a.rutaRelativa.includes('evaluador-sanitizer') &&
           ['.ts', '.js', '.jsx', '.tsx', '.astro', '.vue', '.svelte'].includes(a.extension)
       );
 

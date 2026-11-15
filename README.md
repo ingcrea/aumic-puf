@@ -2,7 +2,7 @@
 
 [![AGPL-3.0 License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![AUM-IC 7:2026 Standard](https://img.shields.io/badge/standard-AUM--IC%207%3A2026-gold.svg)](https://github.com/ingcrea/aum-ic)
-[![npm version](https://img.shields.io/badge/npm-v3.4.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
+[![npm version](https://img.shields.io/badge/npm-v3.5.0-cb3837.svg)](https://www.npmjs.com/package/@ingcrea/aumic-puf)
 
 > 🌐 **Navigation:** 🇺🇸 [Read in English](./README.md) | 🇲🇽 [Leer en Español](./README.es.md) | 📜 [Manifesto (EN)](./MANIFEST.md) | 📜 [Manifiesto (ES)](./MANIFEST.es.md) | 🌌 [AUM-IC 7 Standard](https://github.com/ingcrea/aum-ic)
 
@@ -16,9 +16,12 @@ The Universal Failure Prevention Protocol (PUF) is not a surface-level linter or
 
 Operating agnostically via specialized language adapters for **Rust, TypeScript/JavaScript, Astro, Next.js, Python, PHP, Java/JVM, C#, C/C++, Flutter/Dart, and Shell**, it enforces compliance with international reliability (**ISO/IEC 25010**), information security (**ISO 27001**), and testability (**ISO 29119**) benchmarks.
 
-### Key Engine Features in v3.4.0
+### Key Engine Features in v3.5.0
 
-* **Deterministic Surgical Auto-Fix (`puf sanar` / `puf fix`):** Automated deterministic resolution for G0, G8, G17, G20, and G22 violations, creating immutable G3 checkpoints with SHA-256 hashes prior to mutating files.
+* **Vanilla JS Native Adapter:** Dedicated `AdaptadorJavaScript` providing zero-dependency syntax validation via parallel `node --check`.
+* **Industrial Web Security (G19):** Active CVE scanning (`npm audit`, `composer audit`, `cargo audit`), complete SQLi coverage across CRUD statements, authentication brute-force rate-limiting, and XSS sanitization checks.
+* **Ergonomics & Memory Resilience:** Elimination of blocking dialogs (`alert()`, `confirm()`), prevention of `key={index}` in React lists, and unhandled promise/resource leakage detection in Java & Node.js.
+* **Deterministic Surgical Auto-Fix (`puf sanar` / `puf fix`):** Automated deterministic resolution for G0, G8, G17, G19, G20, and G22 violations, creating immutable G3 checkpoints with SHA-256 hashes prior to mutating files.
 * **Dual Watch Sentinel (`puf watch`):** Reactive filesystem listener reporting both in ANSI terminal and native non-intrusive OS toast notifications (G11 ergonomic compliance).
 * **Native MCP Server (`puf serve` / `puf mcp`):** Built-in Model Context Protocol server over stdio (JSON-RPC) enabling seamless, zero-latency integration with AI agents (Antigravity, Claude, Cursor).
 * **In-Memory VFS Snapshot (`LectorArbolProyecto`):** Structured volatile filesystem snapshot caching. Enables all 25 gates to evaluate project structure and code concurrently with zero disk I/O bottleneck.

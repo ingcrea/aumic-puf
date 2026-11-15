@@ -58,7 +58,7 @@ export class ServidorMcpPuf {
           },
           serverInfo: {
             name: 'aumic-puf-mcp',
-            version: '3.4.0'
+            version: '3.5.0'
           }
         });
         break;

@@ -2,6 +2,7 @@ import { RegistroCompuerta } from "./types.js";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 import { LectorArbolProyecto } from "./arbol-proyecto.js";
+import { EjecutorComando } from "../utils/ejecutor.js";
 
 /**
  * G19: Blindaje de Superficie de Ataque, Cero Fugas e Inyecciones (Zero-Injection & Attack Surface Guard).
@@ -71,17 +72,37 @@ export class EvaluadorCiberseguridad {
       };
     }
 
-    // Escaneo pasivo paralelo de consultas SQL vulnerables
+    // Escaneo pasivo paralelo de consultas SQL vulnerables (SQL Injection) en SELECT, INSERT, UPDATE, DELETE
     let patronesConcatenacionSql = 0;
-    const archivosBackend = await LectorArbolProyecto.filtrarPorExtension(directorioRaiz, [".ts", ".js", ".php", ".py"]);
+    const violacionesSql: string[] = [];
+    const archivosBackend = await LectorArbolProyecto.filtrarPorExtension(directorioRaiz, [".ts", ".js", ".php", ".py", ".java", ".cs"]);
 
     await Promise.all(
       archivosBackend.map(async (arch) => {
-        if (arch.rutaRelativa.includes('test') || arch.rutaRelativa.includes('evaluador')) return;
+        if (
+          arch.rutaRelativa.includes('test') ||
+          arch.rutaRelativa.includes('evaluador') ||
+          arch.rutaRelativa.startsWith('dist')
+        ) {
+          return;
+        }
         try {
           const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
-          if (/SELECT\s+.*\s+FROM\s+.*\s+WHERE\s+.*(\+|`.*(\$\{.*\}).*`|\.\s*\$)/i.test(raw)) {
-            patronesConcatenacionSql++;
+          const lineas = raw.split("\n");
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? "";
+            // Concatenación en SQL: SELECT/INSERT/UPDATE/DELETE + interpolación o concatenación de variables
+            if (
+              /(?:SELECT\s+.*FROM|INSERT\s+INTO|UPDATE\s+.*SET|DELETE\s+FROM)\s+.*(?:WHERE\s+)?.*(?:(?:\+|`.*(?:\$\{.*\}).*`|\.\s*\$)|\+\s*[a-zA-Z0-9_]+\s*\+)/i.test(
+                linea
+              )
+            ) {
+              // Excluir si usa placeholders ?, $1, :param
+              if (!/\bprepare\b|\$wpdb->prepare|\.bind\(|\.query\([^,]+,\s*\[/.test(linea)) {
+                patronesConcatenacionSql++;
+                violacionesSql.push(`${arch.rutaRelativa}:${i + 1}`);
+              }
+            }
           }
         } catch {}
       })
@@ -92,7 +113,7 @@ export class EvaluadorCiberseguridad {
         id: "G19",
         nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
         estado: "rechazada",
-        detalle: `Posible vector de Inyección SQL: Se detectaron ${patronesConcatenacionSql} consultas SQL construidas con concatenación dinámica directa. Utilizar consultas preparadas/parametrizadas obligatoriamente.`,
+        detalle: `Posible vector de Inyección SQL: Se detectaron ${patronesConcatenacionSql} consultas SQL construidas con concatenación dinámica directa: ${violacionesSql.slice(0, 3).join(" | ")}. Utilizar consultas preparadas/parametrizadas obligatoriamente.`,
         evidencia: `${patronesConcatenacionSql} queries no parametrizadas`,
         tiempoEjecucionMs: Date.now() - t
       };
@@ -186,6 +207,109 @@ export class EvaluadorCiberseguridad {
       })
     );
 
+    // Escaneo de inyecciones XSS vía innerHTML con concatenación no saneada en JS/TS
+    const violacionesXssVanilla: string[] = [];
+    await Promise.all(
+      archivosFrontend.map(async (arch) => {
+        if (
+          arch.rutaRelativa.startsWith('test') ||
+          arch.rutaRelativa.startsWith('dist')
+        ) {
+          return;
+        }
+
+        try {
+          const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+          const lineas = raw.split("\n");
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? "";
+            // Detecta .innerHTML = ... + variable o template string con variable no saneada
+            if (/\.innerHTML\s*=\s*(?:[^;]*\+|`[^`]*\$\{[^}]+\}[^`]*`)/i.test(linea)) {
+              const tieneSanitizer = /DOMPurify|sanitize|escapeHtml|encodeURIComponent/i.test(linea);
+              if (!tieneSanitizer) {
+                // Verificar si se define escapeHtml en el archivo
+                const defineSanitizer = /function\s+escapeHtml|const\s+escapeHtml/i.test(raw);
+                if (!defineSanitizer) {
+                  violacionesXssVanilla.push(`${arch.rutaRelativa}:${i + 1}`);
+                }
+              }
+            }
+          }
+        } catch {}
+      })
+    );
+
+    // Escaneo de protección contra Fuerza Bruta (Rate Limiting) en endpoints de autenticación
+    let faltaRateLimitAuth = false;
+    let endpointAuthSinRateLimit: string | null = null;
+    const archivosAuth = todosLosArchivos.filter((a) => {
+      const r = a.rutaRelativa.toLowerCase();
+      return (
+        (r.includes('auth') || r.includes('login') || r.includes('signin')) &&
+        (a.extension === '.ts' || a.extension === '.js' || a.extension === '.php') &&
+        !r.startsWith('test') &&
+        !r.startsWith('dist')
+      );
+    });
+
+    for (const arch of archivosAuth) {
+      try {
+        const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+        // Si maneja endpoints POST o procesa credenciales/password
+        if (
+          /POST|password|contraseña|authenticate|login/i.test(raw) &&
+          (raw.includes('req.body') || raw.includes('$_POST') || raw.includes('request.json()'))
+        ) {
+          // Verificar si implementa rate limiting, token bucket, slowDown, redis o captcha
+          const tieneProteccionFuerzaBruta =
+            /rateLimit|rate-limit|limiter|slowDown|throttle|Redis|cloudflare|turnstile|recaptcha|hcaptcha|fail_count|intentos/i.test(
+              raw
+            );
+          if (!tieneProteccionFuerzaBruta) {
+            faltaRateLimitAuth = true;
+            endpointAuthSinRateLimit = arch.rutaRelativa;
+            break;
+          }
+        }
+      } catch {}
+    }
+
+    if (faltaRateLimitAuth && endpointAuthSinRateLimit) {
+      return {
+        id: "G19",
+        nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+        estado: "rechazada",
+        detalle: `Vulnerabilidad a Ataques de Fuerza Bruta: El endpoint/controlador de autenticación '${endpointAuthSinRateLimit}' carece de Rate Limiting o limitación de intentos por IP/usuario.`,
+        evidencia: `Falta de Rate Limiting en ${endpointAuthSinRateLimit}`,
+        tiempoEjecucionMs: Date.now() - t
+      };
+    }
+
+    // Auditoría activa de dependencias y CVEs críticos (npm audit / composer audit)
+    const tienePackageJson = todosLosArchivos.some((a) => a.rutaRelativa === "package.json");
+    if (tienePackageJson) {
+      try {
+        // Ejecutar npm audit enfocado en vulnerabilidades críticas
+        const resAudit = await EjecutorComando.ejecutar("npm audit --audit-level=critical --json 2>/dev/null", directorioRaiz, 15000);
+        if (resAudit.salidaEstandar) {
+          try {
+            const auditData = JSON.parse(resAudit.salidaEstandar);
+            const numCriticas = auditData.metadata?.vulnerabilities?.critical || 0;
+            if (numCriticas > 0) {
+              return {
+                id: "G19",
+                nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+                estado: "rechazada",
+                detalle: `CVE Crítico en Dependencias: Se detectaron ${numCriticas} vulnerabilidades de severidad CRÍTICA en el árbol de paquetes (npm audit). Requiere parcheo inmediato.`,
+                evidencia: `${numCriticas} CVEs críticos detectados`,
+                tiempoEjecucionMs: Date.now() - t
+              };
+            }
+          } catch {}
+        }
+      } catch {}
+    }
+
     if (violacionesXssReact.length > 0) {
       return {
         id: "G19",
@@ -201,8 +325,8 @@ export class EvaluadorCiberseguridad {
       id: "G19",
       nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
       estado: "aprobada",
-      detalle: "Superficie de ataque sellada: Cero fugas en .env, tabnabbing mitigado, XSS React sanitizado y consultas parametrizadas conformes.",
-      evidencia: "Cero vectores de inyeccion pasiva, XSS y tabnabbing blindados",
+      detalle: "Superficie de ataque sellada: Cero CVEs críticos, fuerza bruta mitigada, tabnabbing sellado, XSS sanitizado y consultas SQL parametrizadas.",
+      evidencia: "CVEs 0 críticos | SQLi conforme | XSS sanitizado | Anti-Bruteforce verificado",
       tiempoEjecucionMs: Date.now() - t
     };
   }

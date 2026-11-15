@@ -109,12 +109,65 @@ export class EvaluadorLighthouse {
       }
     } catch {}
 
+    // Auditoría estática de accesibilidad WCAG: etiquetas <img> sin atributo 'alt'
+    try {
+      const archivosMarcado = await LectorArbolProyecto.filtrarPorExtension(directorioRaiz, [
+        ".astro",
+        ".html",
+        ".jsx",
+        ".tsx",
+        ".vue",
+        ".svelte",
+        ".php",
+      ]);
+
+      const violacionesImgAlt: string[] = [];
+
+      for (const arch of archivosMarcado) {
+        if (
+          arch.rutaRelativa.startsWith('test') ||
+          arch.rutaRelativa.startsWith('dist') ||
+          arch.rutaRelativa.startsWith('.astro')
+        ) {
+          continue;
+        }
+
+        try {
+          const contenido = await fs.readFile(arch.rutaAbsoluta, "utf8");
+          const lineas = contenido.split("\n");
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? "";
+            const matches = linea.matchAll(/<img\b([^>]*)>/gi);
+            for (const m of matches) {
+              const attrs = m[1] ?? "";
+              if (!/\balt\s*=/i.test(attrs)) {
+                violacionesImgAlt.push(
+                  `${arch.rutaRelativa}:${i + 1} -> Etiqueta <img> sin atributo alt para accesibilidad`
+                );
+              }
+            }
+          }
+        } catch {}
+      }
+
+      if (violacionesImgAlt.length > 0) {
+        return {
+          id: "G16",
+          nombre: "Calidad Visual, Core Web Vitals y Auditoria Web (Lighthouse / CWV)",
+          estado: "rechazada",
+          detalle: `Fallo de Accesibilidad WCAG 2.1 (Google PSI): Se detectaron ${violacionesImgAlt.length} etiquetas <img> sin atributo 'alt': ${violacionesImgAlt.slice(0, 3).join(" | ")}`,
+          evidencia: `${violacionesImgAlt.length} imágenes sin alt`,
+          tiempoEjecucionMs: Date.now() - t
+        };
+      }
+    } catch {}
+
     return {
       id: "G16",
       nombre: "Calidad Visual, Core Web Vitals y Auditoria Web (Lighthouse / CWV)",
       estado: "aprobada",
-      detalle: "Auditoria visual y ratios de contraste WCAG AA/AAA certificados conforme a estándares Google PSI.",
-      evidencia: "Ratios WCAG conforme (>= 4.5:1)",
+      detalle: "Auditoria visual, ratios de contraste WCAG AA/AAA y semántica de imágenes certificados conforme a estándares Google PSI.",
+      evidencia: "Ratios WCAG conforme e imágenes con alt conforme",
       tiempoEjecucionMs: Date.now() - t
     };
   }

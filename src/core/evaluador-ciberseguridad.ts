@@ -98,12 +98,69 @@ export class EvaluadorCiberseguridad {
       };
     }
 
+    // Escaneo de enlaces externos con target="_blank" sin rel="noopener noreferrer" (Reverse Tabnabbing)
+    const archivosFrontend = await LectorArbolProyecto.filtrarPorExtension(directorioRaiz, [
+      ".astro",
+      ".html",
+      ".jsx",
+      ".tsx",
+      ".vue",
+      ".svelte",
+      ".php",
+    ]);
+
+    const violacionesTabnabbing: string[] = [];
+
+    await Promise.all(
+      archivosFrontend.map(async (arch) => {
+        if (
+          arch.rutaRelativa.startsWith('test') ||
+          arch.rutaRelativa.includes('evaluador') ||
+          arch.rutaRelativa.startsWith('dist') ||
+          arch.rutaRelativa.startsWith('.astro')
+        ) {
+          return;
+        }
+
+        try {
+          const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+          const lineas = raw.split("\n");
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? "";
+            const matches = linea.matchAll(/<(?:a|Button)\b([^>]*)>/gi);
+            for (const m of matches) {
+              const attrs = m[1] ?? "";
+              if (/target\s*=\s*["']_blank["']/i.test(attrs)) {
+                // Verificar si incluye rel con noopener
+                if (!/rel\s*=\s*["'][^"']*noopener[^"']*["']/i.test(attrs)) {
+                  violacionesTabnabbing.push(
+                    `${arch.rutaRelativa}:${i + 1} -> Enlace target="_blank" sin rel="noopener noreferrer"`
+                  );
+                }
+              }
+            }
+          }
+        } catch {}
+      })
+    );
+
+    if (violacionesTabnabbing.length > 0) {
+      return {
+        id: "G19",
+        nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+        estado: "rechazada",
+        detalle: `Vulnerabilidad Web (Reverse Tabnabbing): Se detectaron ${violacionesTabnabbing.length} enlaces target="_blank" desprovistos de rel="noopener noreferrer": ${violacionesTabnabbing.slice(0, 3).join(" | ")}`,
+        evidencia: `${violacionesTabnabbing.length} enlaces sin noopener`,
+        tiempoEjecucionMs: Date.now() - t
+      };
+    }
+
     return {
       id: "G19",
       nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
       estado: "aprobada",
-      detalle: "Superficie de ataque sellada: Cero fugas de credenciales en .env, cero endpoints legacy vulnerables y consultas parametrizadas conformes.",
-      evidencia: "Cero vectores de inyeccion pasiva",
+      detalle: "Superficie de ataque sellada: Cero fugas de credenciales en .env, cero endpoints legacy, tabnabbing mitigado y consultas parametrizadas conformes.",
+      evidencia: "Cero vectores de inyeccion pasiva y tabnabbing blindado",
       tiempoEjecucionMs: Date.now() - t
     };
   }

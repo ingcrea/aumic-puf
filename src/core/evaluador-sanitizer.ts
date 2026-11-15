@@ -43,6 +43,41 @@ export class EvaluadorSanitizer {
 
       const tiempoTotal = Date.now() - inicio;
 
+      // Escaneo pasivo de declaraciones 'debugger' en código fuente
+      const violacionesDebugger: string[] = [];
+      const archivosCodigo = archivos.filter(
+        (a) =>
+          !a.rutaRelativa.startsWith('test') &&
+          !a.rutaRelativa.startsWith('dist') &&
+          !a.rutaRelativa.startsWith('.astro') &&
+          ['.ts', '.js', '.jsx', '.tsx', '.astro', '.vue', '.svelte'].includes(a.extension)
+      );
+
+      for (const arch of archivosCodigo) {
+        try {
+          const raw = await (await import('node:fs/promises')).readFile(arch.rutaAbsoluta, 'utf-8');
+          const lineas = raw.split('\n');
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? '';
+            const limpia = linea.replace(/\/\/.*$/, '').replace(/\/\*.*?\*\//g, '');
+            if (/\bdebugger\b/.test(limpia)) {
+              violacionesDebugger.push(`${arch.rutaRelativa}:${i + 1} -> Declaración 'debugger' residual`);
+            }
+          }
+        } catch {}
+      }
+
+      if (violacionesDebugger.length > 0) {
+        return {
+          id: 'G0',
+          nombre: 'Higiene Forense Anti-Entropia y Codificacion Pura',
+          estado: 'rechazada',
+          detalle: `Higiene forense comprometida: Se detectaron ${violacionesDebugger.length} declaraciones 'debugger' residuales en producción: ${violacionesDebugger.slice(0, 3).join(' | ')}`,
+          evidencia: `${violacionesDebugger.length} debuggers residuales`,
+          tiempoEjecucionMs: tiempoTotal,
+        };
+      }
+
       if (infectados.length === 0) {
         return {
           id: 'G0',

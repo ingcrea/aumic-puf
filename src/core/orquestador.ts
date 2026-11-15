@@ -27,6 +27,7 @@ import { EvaluadorMutacion } from './evaluador-mutacion.js';
 import { EvaluadorCaos } from './evaluador-caos.js';
 import { RepositorioSqliteAudit } from './repositorio-sqlite.js';
 import { LinterCssInline } from './linter-inline-css.js';
+import { LectorArbolProyecto } from './arbol-proyecto.js';
 import { SelectorAdaptador } from '../adapters/selector.js';
 
 export interface OpcionesAuditoria {
@@ -273,22 +274,72 @@ export class OrquestadorPUF15 {
     const evaluarG11 = async (): Promise<RegistroCompuerta> => {
       const t = Date.now();
       let g11Exitosa = true;
-      let g11Detalle = 'Inmunidad de foco y desacoplamiento de bucle UI verificado.';
-      let g11Evidencia = 'Zero-Focus Stealing garantizado';
+      let g11Detalle = 'Inmunidad de foco, desacoplamiento de bucle UI y cero alertas bloqueantes verificado.';
+      let g11Evidencia = 'Zero-Focus Stealing y modales no bloqueantes garantizados';
 
-      for (const archivo of archivosAfectados) {
-        if (archivo.endsWith('.rs') || archivo.endsWith('.ts') || archivo.endsWith('.js') || archivo.endsWith('.cs')) {
-          try {
-            const rutaAbs = path.isAbsolute(archivo) ? archivo : path.join(this.directorioRaiz, archivo);
-            const contenido = await fs.readFile(rutaAbs, 'utf-8');
-            if (contenido.includes('Command::new') && !contenido.includes('0x08000000') && !contenido.includes('CREATE_NO_WINDOW')) {
-              g11Exitosa = false;
-              g11Detalle = 'Alerta en ' + path.basename(archivo) + ': Invocacion sin CREATE_NO_WINDOW.';
-              g11Evidencia = 'Violacion Win32 detectada';
-              break;
-            }
-          } catch { /* Ignorar archivos no presentes */ }
+      const archivosSnapshot = await LectorArbolProyecto.filtrarPorExtension(this.directorioRaiz, [
+        '.rs',
+        '.ts',
+        '.js',
+        '.cs',
+        '.astro',
+        '.html',
+        '.jsx',
+        '.tsx',
+      ]);
+
+      const violacionesG11: string[] = [];
+
+      for (const arch of archivosSnapshot) {
+        if (
+          arch.rutaRelativa.includes('test') ||
+          arch.rutaRelativa.includes('evaluador') ||
+          arch.rutaRelativa.includes('node_modules')
+        ) {
+          continue;
         }
+
+        try {
+          const contenido = await fs.readFile(arch.rutaAbsoluta, 'utf-8');
+
+          // Win32 Command::new sin CREATE_NO_WINDOW
+          if (
+            (arch.extension === '.rs' || arch.extension === '.cs') &&
+            contenido.includes('Command::new') &&
+            !contenido.includes('0x08000000') &&
+            !contenido.includes('CREATE_NO_WINDOW')
+          ) {
+            violacionesG11.push(`${arch.rutaRelativa} -> Invocacion de subproceso sin flag CREATE_NO_WINDOW`);
+          }
+
+          // Detección de alert(), confirm(), prompt() nativos que congelan el hilo UI
+          const lineas = contenido.split('\n');
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? '';
+            // Ignorar comentarios
+            const lineaSinComentarios = linea.replace(/\/\/.*$/, '').replace(/\/\*.*?\*\//g, '');
+            if (/\b(?:window\.)?(alert|confirm|prompt)\s*\(/i.test(lineaSinComentarios)) {
+              // Excluir AumAlert, sweetalert, etc.
+              if (
+                !/AumAlert|sweetalert|SweetAlert|Swal|customAlert|\.alert\(|toast/i.test(
+                  lineaSinComentarios
+                )
+              ) {
+                violacionesG11.push(
+                  `${arch.rutaRelativa}:${i + 1} -> Uso de diálogo bloqueante nativo (${lineaSinComentarios.trim()}). Usar AumAlert / Toast no bloqueante.`
+                );
+              }
+            }
+          }
+        } catch {
+          /* Ignorar archivos con error de lectura */
+        }
+      }
+
+      if (violacionesG11.length > 0) {
+        g11Exitosa = false;
+        g11Detalle = `Fallo de Ergonomía UI: Se detectaron ${violacionesG11.length} infracciones: ${violacionesG11.slice(0, 3).join(' | ')}`;
+        g11Evidencia = `${violacionesG11.length} violaciones de foco/ergonomía`;
       }
 
       return {

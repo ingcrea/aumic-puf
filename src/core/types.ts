@@ -69,6 +69,7 @@ export type EcosistemaLenguaje =
   | 'astro'
   | 'rust'
   | 'typescript'
+  | 'javascript'
   | 'nextjs'
   | 'java'
   | 'csharp'

@@ -73,6 +73,8 @@ export class EvaluadorSintaxisUniversal {
             this.auditarCss(arch.rutaRelativa, contenido, errores);
           } else if (arch.extension === ".php" || arch.extension === ".phtml") {
             this.auditarPhp(arch.rutaRelativa, contenido, errores);
+          } else if (arch.extension === ".jsx" || arch.extension === ".tsx") {
+            this.auditarReactJsx(arch.rutaRelativa, contenido, errores);
           }
         })
       );
@@ -361,6 +363,26 @@ export class EvaluadorSintaxisUniversal {
         mensaje: `Delimitador sin cerrar: '${pendiente.char}' abierto en la línea ${pendiente.linea} nunca fue cerrado al final del archivo.`,
         codigo: "SYN-UNCLOSED-DELIMITER"
       });
+    }
+  }
+
+  /**
+   * Auditoría de React / JSX / TSX: Detección de renderizado de listas con key={index}
+   */
+  private static auditarReactJsx(archivo: string, contenido: string, errores: ErrorSintaxis[]): void {
+    const lineas = contenido.split("\n");
+    for (let i = 0; i < lineas.length; i++) {
+      const linea = lineas[i] ?? "";
+      // Detecta patrones peligrosos de reconciliación en JSX: key={index} o key={idx} o key={i}
+      if (/key\s*=\s*\{\s*(?:index|idx|i)\s*\}/i.test(linea)) {
+        errores.push({
+          archivo,
+          linea: i + 1,
+          lenguaje: "REACT/JSX",
+          mensaje: "Anti-patrón de Virtual DOM: Se detectó 'key={index}'. El uso del índice de array como clave en listas React/Next.js corrompe la reconciliación y el estado local. Usar un identificador único y persistente (id/uuid).",
+          codigo: "REACT-KEY-INDEX"
+        });
+      }
     }
   }
 }

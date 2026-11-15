@@ -28,9 +28,40 @@ export class EvaluadorCaos {
     let llamadasSinTimeout = 0;
     let tieneManejoResiliencia = false;
 
+    // Detección de promesas huérfanas en JS/TS (.then() sin .catch())
+    let promesasSinCatch = 0;
+    const violacionesPromesas: string[] = [];
+
+    // Detección de fugas de recursos en Java (AutoCloseable sin try-with-resources)
+    let fugasRecursosJava = 0;
+    const violacionesJava: string[] = [];
+
     for (const arch of archivosRed) {
       try {
         const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+
+        // JS/TS: Promesas .then() sin .catch()
+        if (arch.extension === ".ts" || arch.extension === ".js") {
+          const thenMatches = raw.match(/\.then\s*\(/g);
+          const catchMatches = raw.match(/\.catch\s*\(/g);
+          const numThen = thenMatches ? thenMatches.length : 0;
+          const numCatch = catchMatches ? catchMatches.length : 0;
+          if (numThen > 0 && numCatch === 0) {
+            promesasSinCatch++;
+            violacionesPromesas.push(`${arch.rutaRelativa} (${numThen} .then() sin .catch())`);
+          }
+        }
+
+        // Java: Fugas de recursos (Connection, Statement, InputStream instanciados sin try-with-resources)
+        if (arch.extension === ".java") {
+          if (/(?:Connection|Statement|PreparedStatement|ResultSet|FileInputStream|FileOutputStream)\s+[a-zA-Z0-9_]+\s*=\s*/.test(raw)) {
+            // Verificar si usa try ( ... )
+            if (!/try\s*\([^)]*(?:Connection|Statement|PreparedStatement|InputStream|OutputStream)[^)]*\)/.test(raw)) {
+              fugasRecursosJava++;
+              violacionesJava.push(`${arch.rutaRelativa} (Recurso sin try-with-resources)`);
+            }
+          }
+        }
 
         // Detección de patrones de resiliencia (Circuit Breakers, reintentos, backoff)
         if (
@@ -51,6 +82,28 @@ export class EvaluadorCaos {
           llamadasSinTimeout += fetchMatches.length;
         }
       } catch {}
+    }
+
+    if (fugasRecursosJava > 0) {
+      return {
+        id: "G24",
+        nombre: "Inyección de Caos, Disyuntores y Auto-Sanación (Chaos & Fault Injection Guard)",
+        estado: "rechazada",
+        detalle: `Fugas de recursos en Java/JVM: Se detectaron ${fugasRecursosJava} instancias de I/O o base de datos sin 'try-with-resources': ${violacionesJava.slice(0, 3).join(" | ")}. Riesgo de bloqueo de descriptores de archivo y pool exhausto.`,
+        evidencia: `${fugasRecursosJava} fugas de recursos en Java`,
+        tiempoEjecucionMs: Date.now() - t
+      };
+    }
+
+    if (promesasSinCatch > 4) {
+      return {
+        id: "G24",
+        nombre: "Inyección de Caos, Disyuntores y Auto-Sanación (Chaos & Fault Injection Guard)",
+        estado: "rechazada",
+        detalle: `Vulnerabilidad a UnhandledPromiseRejection: Se detectaron ${promesasSinCatch} archivos con promesas .then() sin bloque .catch() protector: ${violacionesPromesas.slice(0, 3).join(" | ")}.`,
+        evidencia: `${promesasSinCatch} archivos con promesas huérfanas`,
+        tiempoEjecucionMs: Date.now() - t
+      };
     }
 
     if (llamadasSinTimeout > 8 && !tieneManejoResiliencia) {

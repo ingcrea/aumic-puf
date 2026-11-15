@@ -9,6 +9,7 @@ import { AdaptadorRust } from './rust.js';
 import { AdaptadorNextJs } from './nextjs.js';
 import { AdaptadorAstro } from './astro.js';
 import { AdaptadorTypeScript } from './typescript.js';
+import { AdaptadorJavaScript } from './javascript.js';
 import { AdaptadorJava } from './java.js';
 import { AdaptadorCSharp } from './csharp.js';
 import { AdaptadorFlutter } from './flutter.js';
@@ -24,6 +25,7 @@ export class SelectorAdaptador {
     new AdaptadorNextJs(),
     new AdaptadorAstro(),
     new AdaptadorTypeScript(),
+    new AdaptadorJavaScript(),
     new AdaptadorJava(),
     new AdaptadorCSharp(),
     new AdaptadorFlutter(),

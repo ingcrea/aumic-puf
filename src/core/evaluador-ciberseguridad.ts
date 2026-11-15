@@ -155,12 +155,54 @@ export class EvaluadorCiberseguridad {
       };
     }
 
+    // Escaneo de inyecciones XSS en React / Next.js vía dangerouslySetInnerHTML sin sanitizador
+    const violacionesXssReact: string[] = [];
+    await Promise.all(
+      archivosFrontend.map(async (arch) => {
+        if (
+          arch.rutaRelativa.startsWith('test') ||
+          arch.rutaRelativa.startsWith('dist') ||
+          (!arch.extension.includes('tsx') && !arch.extension.includes('jsx') && !arch.extension.includes('js'))
+        ) {
+          return;
+        }
+
+        try {
+          const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+          const lineas = raw.split("\n");
+          for (let i = 0; i < lineas.length; i++) {
+            const linea = lineas[i] ?? "";
+            if (linea.includes("dangerouslySetInnerHTML")) {
+              // Si no contiene sanitizer (DOMPurify, sanitizeHtml, etc.) en el archivo
+              const tieneSanitizer = /DOMPurify|sanitize|xss|cleanHtml/i.test(raw);
+              if (!tieneSanitizer) {
+                violacionesXssReact.push(
+                  `${arch.rutaRelativa}:${i + 1} -> Uso de dangerouslySetInnerHTML sin sanitizador (DOMPurify/sanitizeHtml)`
+                );
+              }
+            }
+          }
+        } catch {}
+      })
+    );
+
+    if (violacionesXssReact.length > 0) {
+      return {
+        id: "G19",
+        nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+        estado: "rechazada",
+        detalle: `Vulnerabilidad XSS en React/Next.js: Se detectaron ${violacionesXssReact.length} usos de 'dangerouslySetInnerHTML' sin sanitización: ${violacionesXssReact.slice(0, 3).join(" | ")}`,
+        evidencia: `${violacionesXssReact.length} XSS potenciales con dangerouslySetInnerHTML`,
+        tiempoEjecucionMs: Date.now() - t
+      };
+    }
+
     return {
       id: "G19",
       nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
       estado: "aprobada",
-      detalle: "Superficie de ataque sellada: Cero fugas de credenciales en .env, cero endpoints legacy, tabnabbing mitigado y consultas parametrizadas conformes.",
-      evidencia: "Cero vectores de inyeccion pasiva y tabnabbing blindado",
+      detalle: "Superficie de ataque sellada: Cero fugas en .env, tabnabbing mitigado, XSS React sanitizado y consultas parametrizadas conformes.",
+      evidencia: "Cero vectores de inyeccion pasiva, XSS y tabnabbing blindados",
       tiempoEjecucionMs: Date.now() - t
     };
   }

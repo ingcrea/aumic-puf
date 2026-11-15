@@ -8,6 +8,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { AdaptadorLenguaje, ContextoDeteccion, EcosistemaLenguaje } from '../core/types.js';
+import { LectorArbolProyecto } from '../core/arbol-proyecto.js';
 
 export interface CriteriosHeuristicos {
   readonly manifiestos: readonly string[];
@@ -27,7 +28,7 @@ export abstract class AdaptadorBase implements AdaptadorLenguaje {
 
   /** G12: Regex que captura href/src/to con rutas locales (no http, no #, no {}) */
   private static readonly REGEX_RUTA_LOCAL =
-    /(?:href|src|to|action)=["'](?!https?:\/\/|\/\/|#|\{)([^"']+)["']/gi;
+    /(?:href|src|to)\s*=\s*["'](?!https?:\/\/|\/\/|#|\{)([^"']+)["']/gi;
 
   /** G13: Detecta handlers de eventos vacios o inertes */
   private static readonly REGEX_HANDLER_INERTE =
@@ -76,7 +77,7 @@ export abstract class AdaptadorBase implements AdaptadorLenguaje {
   ): Promise<{ exitoso: boolean; mensaje: string }>;
 
   /**
-   * G12: Dead Link Sweeper — detecta hrefs/srcs locales rotos en archivos web.
+   * G12: Dead Link Sweeper — detecta hrefs/srcs locales rotos y enlaces huérfanos (#) sin manejador.
    * Implementacion base compartida; los adaptadores especializados pueden sobreescribirla.
    */
   public async auditarRutasVivas(
@@ -85,24 +86,73 @@ export abstract class AdaptadorBase implements AdaptadorLenguaje {
   ): Promise<{ exitoso: boolean; violaciones: readonly string[] }> {
     const violaciones: string[] = [];
 
-    for (const rutaRelativa of archivosAfectados) {
-      const ext = path.extname(rutaRelativa).toLowerCase();
-      if (!AdaptadorBase.EXT_WEB.has(ext)) continue;
+    // Si no se pasaron archivos afectados específicos, escanear todo el árbol del proyecto
+    let archivosAEscanear: readonly string[] = archivosAfectados;
+    if (!archivosAEscanear || archivosAEscanear.length === 0) {
+      const snap = await LectorArbolProyecto.obtenerSnapshot(directorioRaiz);
+      archivosAEscanear = snap.map((e) => e.rutaRelativa);
+    }
 
+    // Filtrar archivos web reales (excluyendo dist, build, .astro, .next, etc.)
+    const archivosWeb = archivosAEscanear.filter((r) => {
+      const ext = path.extname(r).toLowerCase();
+      if (!AdaptadorBase.EXT_WEB.has(ext)) return false;
+      const partes = r.replace(/\\/g, '/').split('/');
+      return !partes.some((p) => p.startsWith('dist') || p === 'build' || p === 'out' || p === '.astro');
+    });
+
+    for (const rutaRelativa of archivosWeb) {
       const rutaAbsoluta = path.resolve(directorioRaiz, rutaRelativa);
       const contenido = await fs.readFile(rutaAbsoluta, 'utf-8').catch(() => null);
       if (!contenido) continue;
 
-      let m: RegExpExecArray | null;
-      const regex = new RegExp(AdaptadorBase.REGEX_RUTA_LOCAL.source, 'gi');
-      while ((m = regex.exec(contenido)) !== null) {
-        const ruta = m[1];
-        if (!ruta || ruta.startsWith('{') || ruta.startsWith('mailto:') || ruta.startsWith('tel:')) continue;
-        const base = ruta.split('?')[0]!.split('#')[0]!;
-        const rutaDestino = path.resolve(path.dirname(rutaAbsoluta), base);
-        const existe = await fs.stat(rutaDestino).catch(() => null);
-        if (!existe) {
-          violaciones.push(`${rutaRelativa} -> "${ruta}" (no existe en filesystem)`);
+      const lineas = contenido.split('\n');
+
+      for (let i = 0; i < lineas.length; i++) {
+        const linea = lineas[i] ?? '';
+
+        // 1. Detección de Enlaces Huérfanos: <a ... href="#" ...> o <a ... href='#' ...>
+        const linkMatches = linea.matchAll(/<a\b([^>]*)>/gi);
+        for (const m of linkMatches) {
+          const attrs = m[1] ?? '';
+          if (/href\s*=\s*["']#["']/i.test(attrs)) {
+            // Verificar si cuenta con controlador de acción legítimo
+            const tieneManejador =
+              /onclick|on:click|@click|\(click\)|v-on:click|data-aum-|data-action|data-modal|data-drawer|data-tab|data-toggle|data-target|data-utility|data-copy|role=["']button["']/i.test(
+                attrs
+              );
+            if (!tieneManejador) {
+              violaciones.push(
+                `${rutaRelativa}:${i + 1} -> Enlace huérfano con href="#" sin manejador interactivo ni data-aum-* action`
+              );
+            }
+          }
+        }
+
+        // 2. Rutas relativas locales no resolubles en filesystem
+        let mRuta: RegExpExecArray | null;
+        const regex = new RegExp(AdaptadorBase.REGEX_RUTA_LOCAL.source, 'gi');
+        while ((mRuta = regex.exec(linea)) !== null) {
+          const ruta = mRuta[1];
+          if (
+            !ruta ||
+            ruta.startsWith('{') ||
+            ruta.startsWith('mailto:') ||
+            ruta.startsWith('tel:') ||
+            ruta.startsWith('javascript:') ||
+            ruta.startsWith('#')
+          ) {
+            continue;
+          }
+          // Rutas absolutas de servidor web (/catalog, /telemetry, /api/...) se excluyen de chequeo fs directo
+          if (ruta.startsWith('/')) continue;
+
+          const base = ruta.split('?')[0]!.split('#')[0]!;
+          const rutaDestino = path.resolve(path.dirname(rutaAbsoluta), base);
+          const existe = await fs.stat(rutaDestino).catch(() => null);
+          if (!existe) {
+            violaciones.push(`${rutaRelativa}:${i + 1} -> "${ruta}" (ruta relativa no existe en filesystem)`);
+          }
         }
       }
     }
@@ -111,7 +161,7 @@ export abstract class AdaptadorBase implements AdaptadorLenguaje {
   }
 
   /**
-   * G13: Living UI Actions — detecta handlers de eventos vacios o inertes.
+   * G13: Living UI Actions — detecta handlers de eventos vacíos o botones/enlaces inertes en el DOM.
    * Implementacion base compartida; los adaptadores especializados pueden sobreescribirla.
    */
   public async auditarInteractividad(
@@ -120,10 +170,22 @@ export abstract class AdaptadorBase implements AdaptadorLenguaje {
   ): Promise<{ exitoso: boolean; violaciones: readonly string[] }> {
     const violaciones: string[] = [];
 
-    for (const rutaRelativa of archivosAfectados) {
-      const ext = path.extname(rutaRelativa).toLowerCase();
-      if (!AdaptadorBase.EXT_WEB.has(ext)) continue;
+    // Si no se pasaron archivos afectados específicos, escanear todo el árbol del proyecto
+    let archivosAEscanear: readonly string[] = archivosAfectados;
+    if (!archivosAEscanear || archivosAEscanear.length === 0) {
+      const snap = await LectorArbolProyecto.obtenerSnapshot(directorioRaiz);
+      archivosAEscanear = snap.map((e) => e.rutaRelativa);
+    }
 
+    // Filtrar archivos web reales (excluyendo dist, build, .astro, .next, etc.)
+    const archivosWeb = archivosAEscanear.filter((r) => {
+      const ext = path.extname(r).toLowerCase();
+      if (!AdaptadorBase.EXT_WEB.has(ext)) return false;
+      const partes = r.replace(/\\/g, '/').split('/');
+      return !partes.some((p) => p.startsWith('dist') || p === 'build' || p === 'out' || p === '.astro');
+    });
+
+    for (const rutaRelativa of archivosWeb) {
       const rutaAbsoluta = path.resolve(directorioRaiz, rutaRelativa);
       const contenido = await fs.readFile(rutaAbsoluta, 'utf-8').catch(() => null);
       if (!contenido) continue;
@@ -131,10 +193,32 @@ export abstract class AdaptadorBase implements AdaptadorLenguaje {
       const lineas = contenido.split('\n');
       for (let i = 0; i < lineas.length; i++) {
         const linea = lineas[i] ?? '';
+
+        // 1. Handlers explícitamente vacíos
         if (AdaptadorBase.REGEX_HANDLER_INERTE.test(linea)) {
-          violaciones.push(`${rutaRelativa}:${i + 1} -> handler inerte: ${linea.trim()}`);
+          violaciones.push(`${rutaRelativa}:${i + 1} -> handler inerte vacío: ${linea.trim()}`);
         }
         AdaptadorBase.REGEX_HANDLER_INERTE.lastIndex = 0;
+
+        // 2. Elementos <button ...> sin acción ni manejador interactivo
+        const btnMatches = linea.matchAll(/<button\b([^>]*)>/gi);
+        for (const m of btnMatches) {
+          const attrs = m[1] ?? '';
+          // Si es type="submit" o type="reset", tiene función nativa de formulario
+          if (/type\s*=\s*["'](?:submit|reset)["']/i.test(attrs)) continue;
+
+          // Si tiene handler o data-action / data-* o id / class para binding JS o evento de framework
+          const tieneManejadorOId =
+            /onclick|on:click|@click|\(click\)|v-on:click|data-aum-|data-|id\s*=\s*["'][^"']+["']|href\s*=/i.test(
+              attrs
+            );
+
+          if (!tieneManejadorOId) {
+            violaciones.push(
+              `${rutaRelativa}:${i + 1} -> Botón zombie/inerte sin manejador de evento, data-* action ni ID de binding: <button${attrs.trim() ? ' ' + attrs.trim() : ''}>`
+            );
+          }
+        }
       }
     }
 

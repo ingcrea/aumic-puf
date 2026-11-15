@@ -625,7 +625,7 @@ export class GeneradorReporteHtml {
         <h1 class="header-title">Reporte de <span class="accent">Calidad e Integridad</span></h1>
         <div class="target-url">
           <span>Incidente:</span>
-          <a href="#">${escapeHtml(resultado.idIncidente)}</a>
+          <span class="incident-badge">${escapeHtml(resultado.idIncidente)}</span>
         </div>
         <div class="timestamp-box">Generado el ${escapeHtml(timestamp)}</div>
       </div>

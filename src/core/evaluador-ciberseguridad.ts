@@ -285,11 +285,73 @@ export class EvaluadorCiberseguridad {
       };
     }
 
-    // Auditoría activa de dependencias y CVEs críticos (npm audit / composer audit)
+    // Escaneo de configuraciones inseguras de CORS (Access-Control-Allow-Origin: * con credenciales)
+    let violacionCors = false;
+    let detalleCors = "";
+    for (const arch of archivosBackend) {
+      try {
+        const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+        // Patrón: Access-Control-Allow-Origin: * y Allow-Credentials: true
+        if (
+          /Access-Control-Allow-Origin['"]?\s*:\s*['"]?\*/i.test(raw) ||
+          /cors\(\s*\{\s*origin\s*:\s*['"]?\*['"]?/i.test(raw) ||
+          /header\s*\(\s*['"]Access-Control-Allow-Origin:\s*\*['"]/i.test(raw)
+        ) {
+          if (/credentials\s*:\s*true|Access-Control-Allow-Credentials\s*:\s*['"]?true/i.test(raw)) {
+            violacionCors = true;
+            detalleCors = `${arch.rutaRelativa} (CORS con origin '*' y credentials permitidos simultáneamente)`;
+            break;
+          }
+        }
+      } catch {}
+    }
+
+    if (violacionCors) {
+      return {
+        id: "G19",
+        nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+        estado: "rechazada",
+        detalle: `Vulnerabilidad Crítica de CORS: Se detectó origen comodín ('*') coexistiendo con credenciales activas en ${detalleCors}. Permite robo de sesión y tokens cross-origin.`,
+        evidencia: `CORS permisivo con credenciales en ${detalleCors}`,
+        tiempoEjecucionMs: Date.now() - t
+      };
+    }
+
+    // Escaneo de Cookies inseguras sin flags HttpOnly, Secure y SameSite en cookies de sesión/auth
+    const violacionesCookies: string[] = [];
+    for (const arch of archivosBackend) {
+      try {
+        const raw = await fs.readFile(arch.rutaAbsoluta, "utf8");
+        const lineas = raw.split("\n");
+        for (let i = 0; i < lineas.length; i++) {
+          const linea = lineas[i] ?? "";
+          // Detecta res.cookie('token', ...) o cookies.set('session', ...) o setcookie('auth', ...)
+          if (/(?:res\.cookie|cookies\.set|setcookie)\s*\(\s*['"](?:token|session|auth|jwt|refresh)/i.test(linea)) {
+            const tieneHttpOnly = /httpOnly|httponly/i.test(linea) || (raw.includes("httpOnly:") || raw.includes("httponly => true"));
+            const tieneSameSite = /sameSite|samesite/i.test(linea) || (raw.includes("sameSite:") || raw.includes("samesite =>"));
+            if (!tieneHttpOnly || !tieneSameSite) {
+              violacionesCookies.push(`${arch.rutaRelativa}:${i + 1}`);
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (violacionesCookies.length > 0) {
+      return {
+        id: "G19",
+        nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+        estado: "rechazada",
+        detalle: `Vulnerabilidad en Gestión de Sesión: Se detectaron cookies sensibles (token/session/auth) emitidas sin flags obligatorios HttpOnly/SameSite: ${violacionesCookies.slice(0, 3).join(" | ")}. Riesgo de secuestro de sesión vía XSS/CSRF.`,
+        evidencia: `${violacionesCookies.length} cookies inseguras`,
+        tiempoEjecucionMs: Date.now() - t
+      };
+    }
+
+    // Auditoría activa de dependencias y CVEs críticos (npm audit / composer audit / cargo audit)
     const tienePackageJson = todosLosArchivos.some((a) => a.rutaRelativa === "package.json");
     if (tienePackageJson) {
       try {
-        // Ejecutar npm audit enfocado en vulnerabilidades críticas
         const resAudit = await EjecutorComando.ejecutar("npm audit --audit-level=critical --json 2>/dev/null", directorioRaiz, 15000);
         if (resAudit.salidaEstandar) {
           try {
@@ -300,12 +362,52 @@ export class EvaluadorCiberseguridad {
                 id: "G19",
                 nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
                 estado: "rechazada",
-                detalle: `CVE Crítico en Dependencias: Se detectaron ${numCriticas} vulnerabilidades de severidad CRÍTICA en el árbol de paquetes (npm audit). Requiere parcheo inmediato.`,
+                detalle: `CVE Crítico en Dependencias Node.js: Se detectaron ${numCriticas} vulnerabilidades de severidad CRÍTICA en el árbol de paquetes (npm audit). Requiere parcheo inmediato.`,
                 evidencia: `${numCriticas} CVEs críticos detectados`,
                 tiempoEjecucionMs: Date.now() - t
               };
             }
           } catch {}
+        }
+      } catch {}
+    }
+
+    const tieneComposerLock = todosLosArchivos.some((a) => a.rutaRelativa === "composer.lock");
+    if (tieneComposerLock) {
+      try {
+        const resComposer = await EjecutorComando.ejecutar("composer audit --format=json 2>/dev/null", directorioRaiz, 15000);
+        if (resComposer.salidaEstandar) {
+          try {
+            const composerData = JSON.parse(resComposer.salidaEstandar);
+            const numAdvisories = composerData.advisories ? Object.keys(composerData.advisories).length : 0;
+            if (numAdvisories > 0) {
+              return {
+                id: "G19",
+                nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+                estado: "rechazada",
+                detalle: `CVE en Dependencias PHP (Composer): Se detectaron ${numAdvisories} avisos de seguridad en paquetes de composer.lock.`,
+                evidencia: `${numAdvisories} vulnerabilidades en composer.lock`,
+                tiempoEjecucionMs: Date.now() - t
+              };
+            }
+          } catch {}
+        }
+      } catch {}
+    }
+
+    const tieneCargoLock = todosLosArchivos.some((a) => a.rutaRelativa === "Cargo.lock");
+    if (tieneCargoLock) {
+      try {
+        const resCargo = await EjecutorComando.ejecutar("cargo audit --json 2>/dev/null", directorioRaiz, 15000);
+        if (resCargo.salidaEstandar && !resCargo.exitoso) {
+          return {
+            id: "G19",
+            nombre: "Blindaje de Superficie de Ataque y Cero Inyecciones (Zero-Injection Guard)",
+            estado: "rechazada",
+            detalle: "CVE en Dependencias Rust (Cargo): Se detectaron vulnerabilidades activas en crates de Cargo.lock.",
+            evidencia: "Vulnerabilidades detectadas por cargo-audit",
+            tiempoEjecucionMs: Date.now() - t
+          };
         }
       } catch {}
     }

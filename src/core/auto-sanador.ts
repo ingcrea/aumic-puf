@@ -27,12 +27,12 @@ export class AutoSanador {
     const resultados: ResultadoSanacion[] = [];
     const compuertas = compuertasObjetivo && compuertasObjetivo.length > 0
       ? compuertasObjetivo.map(c => c.toUpperCase().trim())
-      : ['G0', 'G8', 'G17', 'G20', 'G22'];
+      : ['G0', 'G8', 'G17', 'G19', 'G20', 'G22'];
 
     const snapshot = await LectorArbolProyecto.obtenerSnapshot(directorioRaiz);
     const gestorCheckpoint = new GestorPuntoControl(directorioRaiz);
 
-    // 1. Sanar G0 y G8 (Higiene Forense, Mojibake, BOM y saltos LF)
+    // 1. Sanar G0 y G8 (Higiene Forense, Mojibake, BOM, saltos LF y debuggers)
     if (compuertas.includes('G0') || compuertas.includes('G8')) {
       const resG0G8 = await this.sanarG0G8(directorioRaiz, snapshot, gestorCheckpoint);
       resultados.push(resG0G8);
@@ -44,13 +44,19 @@ export class AutoSanador {
       if (resG17) resultados.push(resG17);
     }
 
-    // 3. Sanar G20 (Localhost a variables de entorno en producción)
+    // 3. Sanar G19 (Inyectar rel="noopener noreferrer" en target="_blank" huérfanos)
+    if (compuertas.includes('G19')) {
+      const resG19 = await this.sanarG19(directorioRaiz, snapshot, gestorCheckpoint);
+      if (resG19) resultados.push(resG19);
+    }
+
+    // 4. Sanar G20 (Localhost a variables de entorno en producción)
     if (compuertas.includes('G20')) {
       const resG20 = await this.sanarG20(directorioRaiz, snapshot, gestorCheckpoint);
       if (resG20) resultados.push(resG20);
     }
 
-    // 4. Sanar G22 (Puntos y comas faltantes en CSS/SCSS y PHP)
+    // 5. Sanar G22 (Puntos y comas faltantes en CSS/SCSS y PHP)
     if (compuertas.includes('G22')) {
       const resG22 = await this.sanarG22(directorioRaiz, snapshot, gestorCheckpoint);
       if (resG22) resultados.push(resG22);
@@ -253,6 +259,53 @@ export class AutoSanador {
       archivosModificados: modificados,
       reparacionesAplicadas: arreglos,
       detalle: `Inyectados ${arreglos} delimitadores de punto y coma en ${modificados.length} hojas de estilo.`
+    };
+  }
+
+  /**
+   * Sanación de G19: Inyectar rel="noopener noreferrer" en etiquetas target="_blank"
+   */
+  private static async sanarG19(
+    directorioRaiz: string,
+    snapshot: readonly { rutaAbsoluta: string; rutaRelativa: string; extension: string }[],
+    gestorCheckpoint: GestorPuntoControl
+  ): Promise<ResultadoSanacion | null> {
+    const modificados: string[] = [];
+    let arreglos = 0;
+
+    const extensionesWeb = new Set(['.astro', '.html', '.jsx', '.tsx', '.vue', '.svelte', '.php']);
+
+    for (const arch of snapshot) {
+      if (!extensionesWeb.has(arch.extension)) continue;
+      const r = arch.rutaRelativa;
+      if (r.includes('node_modules/') || r.includes('dist/') || r.startsWith('test')) continue;
+
+      try {
+        const contenido = await fs.readFile(arch.rutaAbsoluta, 'utf8');
+        // Buscar target="_blank" que no tenga rel="noopener noreferrer"
+        if (/target\s*=\s*["']_blank["']/i.test(contenido) && !/rel\s*=\s*["'][^"']*noopener/i.test(contenido)) {
+          const reemplazado = contenido.replace(
+            /(<(?:a|Button)\b[^>]*\btarget\s*=\s*["']_blank["'])(?![^>]*\brel\s*=)([^>]*>)/gi,
+            '$1 rel="noopener noreferrer"$2'
+          );
+
+          if (reemplazado !== contenido) {
+            await gestorCheckpoint.respaldarArchivo('AUTO_FIX_G19', arch.rutaRelativa, directorioRaiz);
+            await fs.writeFile(arch.rutaAbsoluta, reemplazado, 'utf8');
+            modificados.push(arch.rutaRelativa);
+            arreglos++;
+          }
+        }
+      } catch {}
+    }
+
+    if (modificados.length === 0) return null;
+
+    return {
+      compuerta: 'G19',
+      archivosModificados: modificados,
+      reparacionesAplicadas: arreglos,
+      detalle: `Blindados ${arreglos} enlaces externos con rel="noopener noreferrer" contra Reverse Tabnabbing.`
     };
   }
 }
